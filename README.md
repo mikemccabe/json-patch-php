@@ -6,6 +6,7 @@ Produce and apply json-patch objects.
 Implements the IETF json-patch and json-pointer drafts:
 
 http://tools.ietf.org/html/draft-ietf-appsawg-json-patch-02
+
 http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-02
 
 Entry points
