@@ -291,7 +291,6 @@ class JsonPatch
     // XXX seems like a hack; does this disappear with another approach?
     if ($first && strlen($part) == 0 && count($parts) == 0)
     {
-      print("specialcase\n");
       if (!self::compare_arrays($doc, $value))
       {
         throw new JsonPatchException("'test' target value different - expected "
