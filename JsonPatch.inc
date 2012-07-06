@@ -283,16 +283,31 @@ class JsonPatch
 
 
   // Implements the 'test' op
-  private static function test($doc, $parts, $value)
+  private static function test($doc, $parts, $value, $first=true)
   {
     $part = array_shift($parts);
+
+    // Special case for "" (whole doc) target location
+    // XXX seems like a hack; does this disappear with another approach?
+    if ($first && strlen($part) == 0 && count($parts) == 0)
+    {
+      print("specialcase\n");
+      if (!self::compare_arrays($doc, $value))
+      {
+        throw new JsonPatchException("'test' target value different - expected "
+                                     . json_encode($doc) . ", found "
+                                     . json_encode($value));;
+      }
+      return;
+    }
+  
     if (!array_key_exists($part, $doc))
     {
-      throw new JsonPatchException("'test' location $part not in target doc");
+      throw new JsonPatchException("'test' location '$part' not in target doc");
     }
     if (count($parts) > 0)
     {
-      self::test($doc[$part], $parts, $value);
+      self::test($doc[$part], $parts, $value, false);
     }
     else
     {
@@ -312,7 +327,7 @@ class JsonPatch
     $part = array_shift($parts);
     if (!array_key_exists($part, $doc))
     {
-      throw new JsonPatchException("Location $part not found in target doc");
+      throw new JsonPatchException("Location '$part' not found in target doc");
     }
     if (count($parts) > 0)
     {
@@ -380,7 +395,7 @@ class JsonPatch
     {
       if (!array_key_exists($part, $doc))
       {
-        throw new JsonPatchException("'$op' location $part not in target doc");
+        throw new JsonPatchException("'$op' location '$part' not in target doc");
       }
       // recur, adding resulting sub-doc into doc returned to caller
       $doc[$part] = self::do_op($doc[$part], $op, $parts, $value);
