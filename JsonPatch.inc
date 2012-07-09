@@ -489,6 +489,9 @@ class JsonPatch
   // Compute a new document from the supplied $doc and $patches.
   public static function patch_xml($doc, $patches)
   {
+    $doc = self::json_to_array($doc);
+    $patches = self::json_to_array($patches);
+
     // accept singleton patches
     if (count($patches) != 0 && !isset($patches[0]))
     {
