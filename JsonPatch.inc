@@ -484,4 +484,87 @@ class JsonPatch
     }
     return $doc;
   }
+
+
+  // Compute a new document from the supplied $doc and $patches.
+  public static function patch_xml($doc, $patches)
+  {
+    // accept singleton patches
+    if (count($patches) != 0 && !isset($patches[0]))
+    {
+      $patches = Array($patches);
+    }
+
+    foreach ($patches as $patch)
+    {
+      $found = false;
+      foreach (array('add', 'remove', 'replace', 'move', 'copy', 'test')
+               as $op)
+      {
+        if (isset($patch[$op])) {
+          $location = $patch[$op];
+          $found = true;
+          break;
+        }
+      }
+
+      if (!$found)
+      {
+        throw new JsonPatchException("Unrecognized operation $op in "
+                                     . json_encode($patch));
+      }
+
+      $parts = self::decompose_pointer($location);
+      if (in_array($op, Array('test', 'add', 'replace')))
+      {
+        $value = $patch['value'];
+      }
+      if (in_array($op, Array('move', 'copy')))
+      {
+        $to_parts = self::decompose_pointer($patch['to']);
+      }
+      
+      if ($op === 'add')
+      {
+        $doc = self::do_op_xml($doc, $op, $parts, $value);
+      }
+    }
+
+    return $doc;
+  }
+
+
+
+  // Apply a single op to modify the given document.
+  private static function do_op_xml($doc, $op, $parts, $value=null)
+  {
+    // recur until we get to the target
+    $part = array_shift($parts);
+    if (count($parts) > 0)
+    {
+      if (!isset($doc->{$part}))
+      {
+        throw new JsonPatchException("'$op' location '$part' not in target doc");
+      }
+      // recur, adding resulting sub-doc into doc returned to caller
+      self::do_op_xml($doc->{$part}, $op, $parts, $value);
+      return $doc;
+    }
+
+    if ($op == 'add')
+    {
+      // XXX numeric case needed
+      {
+        if (isset($doc->{$part}))
+        {
+          // replace this, as nu semantics are:
+          // if it exists, and the thingping is numeric, then expando.
+
+          throw new JsonPatchException("'add' target '$part' already set");
+        }
+        $doc->addChild($part, $value);
+      }
+    }
+    return $doc;
+  }
 }
