@@ -38,6 +38,9 @@ class JsonPatch
   // the designated leaf value
   public static function get($doc, $pointer)
   {
+    $doc = json_to_array($doc);
+    $pointer = json_to_array($pointer);
+
     $parts = self::decompose_pointer($pointer);
     return self::get_helper($doc, $parts);
   }
@@ -47,6 +50,9 @@ class JsonPatch
   // between $src and $dst
   public static function diff($src, $dst)
   {
+    $src = json_to_array($src);
+    $dst = json_to_array($dst);
+
     return self::diff_values("", $src, $dst);    
   }
 
@@ -54,26 +60,9 @@ class JsonPatch
   // Compute a new document from the supplied $doc and $patches.
   public static function patch($doc, $patches)
   {
-/*     // accept JSON input */
-/*     if (!is_array($doc)) */
-/*     { */
-/*       $doc_str = $doc; */
-/*       $doc = json_decode($doc_str, 1); */
-/*       if (is_null($doc)) */
-/*       { */
-/*         throw new JsonPatchException("Invalid JSON doc:" . $doc_str); */
-/*       } */
-/*     } */
-/*     if (!is_array($patches)) */
-/*     { */
-/*       $patches_str = $patches; */
-/*       $patches = json_decode($patches_str, 1); */
-/*       if (is_null($patches)) */
-/*       { */
-/*         throw new JsonPatchException("Invalid JSON patch:" . $patches_str); */
-/*       } */
-/*     } */
-    
+    $doc = json_to_array($doc);
+    $patches = json_to_array($patches);
+
     // accept singleton patches
     if (count($patches) != 0 && !isset($patches[0]))
     {
@@ -167,6 +156,21 @@ class JsonPatch
 
   // Private functions follow
   
+
+  private static function json_to_array($json)
+  {
+    if (!is_array($json))
+    {
+      $json_str = $json;
+      $json = json_decode($json_str, 1);
+      if (is_null($json))
+      {
+        throw new JsonPatchException("Invalid JSON:" . $json_str);
+      }
+    }
+    return $json
+  }
+
 
   private static function decompose_pointer($pointer)
   {
