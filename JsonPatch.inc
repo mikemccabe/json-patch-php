@@ -38,8 +38,8 @@ class JsonPatch
   // the designated leaf value
   public static function get($doc, $pointer)
   {
-    $doc = json_to_array($doc);
-    $pointer = json_to_array($pointer);
+    $doc = self::json_to_array($doc);
+    $pointer = self::json_to_array($pointer);
 
     $parts = self::decompose_pointer($pointer);
     return self::get_helper($doc, $parts);
@@ -50,8 +50,8 @@ class JsonPatch
   // between $src and $dst
   public static function diff($src, $dst)
   {
-    $src = json_to_array($src);
-    $dst = json_to_array($dst);
+    $src = self::json_to_array($src);
+    $dst = self::json_to_array($dst);
 
     return self::diff_values("", $src, $dst);    
   }
@@ -60,8 +60,8 @@ class JsonPatch
   // Compute a new document from the supplied $doc and $patches.
   public static function patch($doc, $patches)
   {
-    $doc = json_to_array($doc);
-    $patches = json_to_array($patches);
+    $doc = self::json_to_array($doc);
+    $patches = self::json_to_array($patches);
 
     // accept singleton patches
     if (count($patches) != 0 && !isset($patches[0]))
@@ -168,7 +168,7 @@ class JsonPatch
         throw new JsonPatchException("Invalid JSON:" . $json_str);
       }
     }
-    return $json
+    return $json;
   }
 
 
