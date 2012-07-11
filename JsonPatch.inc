@@ -16,7 +16,10 @@ Entry points
 - patch($doc, $patches) - apply patches to $doc and return result
 
 Arguments are PHP arrays, i.e. the output of
-json_decode($json_string, 1)
+json_decode($json_string, 1).
+JSON strings may also be used.
+
+Return values are PHP arrays.
 
 All structures are implemented directly as PHP arrays.
 An array is considered to be 'associative' (e.g. like a JSON 'object')
@@ -26,6 +29,21 @@ Because of this, empty arrays ([]) and empty objects ({}) compare
 the same, and (for instance) an 'add' of a string key to an empty
 array will succeed in this implementation where it might fail in
 others.
+
+$simplexml_mode is provided to help with working with arrays produced
+from XML in the style of simplexml - e.g. repeated XML elements are
+expressed as arrays.  When $simplexml_mode is enabled, leaves with
+scalar values are implicitly treated as length-1 arrays, so this
+test will succeed:
+
+    { "comment": "basic simplexml array promotion",
+      "doc": { "foo":1 },
+      "patch": [ {"add":"/foo/1", "value":2} ],
+      "expected": { "foo":[1, 2] } },
+
+Also, when $simplexml_mode is true, 1-length arrays are converted to scalars
+on return from patch().
+
 */
 
 
@@ -36,13 +54,13 @@ class JsonPatch
 {
   // Follow a json-pointer address into a JSON document and return
   // the designated leaf value
-  public static function get($doc, $pointer)
+  public static function get($doc, $pointer, $simplexml_mode=false)
   {
     $doc = self::json_to_array($doc);
     $pointer = self::json_to_array($pointer);
 
     $parts = self::decompose_pointer($pointer);
-    return self::get_helper($doc, $parts);
+    return self::get_helper($doc, $parts, $simplexml_mode);
   }
 
 
@@ -58,7 +76,7 @@ class JsonPatch
 
 
   // Compute a new document from the supplied $doc and $patches.
-  public static function patch($doc, $patches)
+  public static function patch($doc, $patches, $simplexml_mode=false)
   {
     $doc = self::json_to_array($doc);
     $patches = self::json_to_array($patches);
@@ -100,34 +118,37 @@ class JsonPatch
       
       if ($op === 'add')
       {
-        $doc = self::do_op($doc, $op, $parts, $value);
+        $doc = self::do_op($doc, $op, $parts, $value, $simplexml_mode);
       }
       else if ($op == 'replace')
       {
-        $doc = self::do_op($doc, $op, $parts, $value);
+        $doc = self::do_op($doc, $op, $parts, $value, $simplexml_mode);
       }
       else if ($op == 'remove')
       {
-        $doc = self::do_op($doc, $op, $parts);
+        $doc = self::do_op($doc, $op, $parts, null, $simplexml_mode);
       }
       
       else if ($op == 'test')
       {
-        self::test($doc, $parts, $value);
+        self::test($doc, $parts, $value, $simplexml_mode);
       }
       
       else if ($op == 'copy')
       {
-        $value = self::get_helper($doc, $parts);
-        $doc = self::do_op($doc, 'add', $to_parts, $value);
+        $value = self::get_helper($doc, $parts, $simplexml_mode);
+        $doc = self::do_op($doc, 'add', $to_parts, $value, $simplexml_mode);
       }
       else if ($op == 'move')
       {
-        $value = self::get_helper($doc, $parts);
-        $doc = self::do_op($doc, 'remove', $parts);
-        $doc = self::do_op($doc, 'add', $to_parts, $value);
+        $value = self::get_helper($doc, $parts, $simplexml_mode);
+        $doc = self::do_op($doc, 'remove', $parts, null, $simplexml_mode);
+        $doc = self::do_op($doc, 'add', $to_parts, $value, $simplexml_mode);
       }
     }
+
+    if ($simplexml_mode)
+      $doc = self::re_singletize($doc);
     
     return $doc;
   }
@@ -156,6 +177,82 @@ class JsonPatch
 
   // Private functions follow
   
+  // This one just does leaves
+/*   private static function ds2($doc) { */
+/*     if (!is_array($doc)) */
+/*       return($doc); */
+/*     $result = array(); */
+/*     foreach(array_keys($doc) as $key) */
+/*     { */
+/*       if (self::is_associative($doc) */
+/*           && !(is_array($doc[$key]) || self::is_associative($doc[$key]))) */
+/*       { */
+/*         $result[$key] = array(self::ds2($doc[$key])); */
+/*       } */
+/*       else */
+/*       { */
+/*         $result[$key] = self::ds2($doc[$key]); */
+/*       } */
+/*     } */
+/*     return $result; */
+/*   } */
+
+  // Walk through an associative array and make every value
+  // into an array if it isn't one already.
+/*   private static function de_singletize($doc, $in_array=false) */
+/*   { */
+/*     $result = array(); */
+/*     foreach(array_keys($doc) as $key) */
+/*     { */
+/*       if (!is_array($doc[$key])) */
+/*       { */
+/*         if ($in_array) */
+/*         { */
+/*           $result[$key] = $doc[$key]; */
+/*         } */
+/*         else */
+/*         { */
+/*           $result[$key] = array($doc[$key]); */
+/*         } */
+/*       } */
+/*       else if (self::is_associative($doc[$key])) */
+/*       { */
+/*         if ($in_array) { */
+/*           $result[$key] = self::de_singletize($doc[$key]); */
+/*         } else { */
+/*           $result[$key] = array(self::de_singletize($doc[$key])); */
+/*         } */
+/*       } */
+/*       else */
+/*       { */
+/*         $result[$key] = self::de_singletize($doc[$key], true); */
+/*       } */
+/*     } */
+/*     return $result; */
+/*   } */
+
+/*  <frotz/> -> 0-length array, whereas*/
+/*  <fizz>wizz</fizz> -> "wizz" */
+
+
+  // Walk through the doc and turn every 1-length array into a
+  // singleton value.  This follows SimpleXML behavior.
+  private static function re_singletize($doc)
+  {
+    if (!is_array($doc))
+      return $doc;
+
+    if (isset($doc[0]) && count($doc) == 1)
+      return self::re_singletize($doc[0]);
+
+    $result = array();
+    foreach(array_keys($doc) as $key)
+    {
+      $result[$key] = self::re_singletize($doc[$key]);
+    }
+    return $result;
+  }
+
 
   private static function json_to_array($json)
   {
@@ -287,45 +384,21 @@ class JsonPatch
 
 
   // Implements the 'test' op
-  private static function test($doc, $parts, $value, $first=true)
+  private static function test($doc, $parts, $value, $simplexml_mode)
   {
-    $part = array_shift($parts);
+    $found = self::get_helper($doc, $parts, $simplexml_mode);
 
-    // Special case for "" (whole doc) target location
-    // XXX seems like a hack; does this disappear with another approach?
-    if ($first && strlen($part) == 0 && count($parts) == 0)
+    if (!self::compare_arrays($found, $value))
     {
-      if (!self::compare_arrays($doc, $value))
-      {
-        throw new JsonPatchException("'test' target value different - expected "
-                                     . json_encode($doc) . ", found "
-                                     . json_encode($value));;
-      }
-      return;
-    }
-  
-    if (!array_key_exists($part, $doc))
-    {
-      throw new JsonPatchException("'test' location '$part' not in target doc");
-    }
-    if (count($parts) > 0)
-    {
-      self::test($doc[$part], $parts, $value, false);
-    }
-    else
-    {
-      if (!self::compare_arrays($doc[$part], $value))
-      {
-        throw new JsonPatchException("'test' target value different - expected "
-                                     . json_encode($doc[$part]) . ", found "
-                                     . json_encode($value));;
-      }
+      throw new JsonPatchException("'test' target value different - expected "
+                                   . json_encode($value) . ", found "
+                                   . json_encode($found));;
     }
   }
 
   
-  // Helper for get() and 'copy' and 'move' ops - get a value from a doc.
-  private static function get_helper($doc, $parts)
+  // Helper for get() and 'copy', 'move', 'test' ops - get a value from a doc.
+  private static function get_helper($doc, $parts, $simplexml_mode)
   {
     $part = array_shift($parts);
     if (!array_key_exists($part, $doc))
@@ -334,7 +407,17 @@ class JsonPatch
     }
     if (count($parts) > 0)
     {
-      return self::get_helper($doc[$part], $parts);
+      if ($simplexml_mode
+          && count($parts) == 1 // XXXmm needed?
+          && ($parts[0] == '0' || $parts[0] == '1')
+          && self::is_associative($doc) && !is_array($doc[$part]))
+      {
+        return self::get_helper(array($doc[$part]), $parts, $simplexml_mode);
+      }
+      else
+      {
+        return self::get_helper($doc[$part], $parts, $simplexml_mode);
+      }
     }
     else
     {
@@ -390,10 +473,11 @@ class JsonPatch
   // As php arrays are not passed by reference, this function works
   // recursively, rebuilding complete subarrays that need changing;
   // the revised subarray is changed in the parent array before returning it.
-  private static function do_op($doc, $op, $parts, $value=null)
+  private static function do_op($doc, $op, $parts, $value, $simplexml_mode)
   {
     // recur until we get to the target
     $part = array_shift($parts);
+
     if (count($parts) > 0)
     {
       if (!array_key_exists($part, $doc))
@@ -401,7 +485,22 @@ class JsonPatch
         throw new JsonPatchException("'$op' location '$part' not in target doc");
       }
       // recur, adding resulting sub-doc into doc returned to caller
-      $doc[$part] = self::do_op($doc[$part], $op, $parts, $value);
+
+      // special case for simplexml-style behavior - make singleton
+      // scalar leaves look like 1-length arrays
+      if ($simplexml_mode
+          && count($parts) == 1 // XXXmm needed?
+          && ($parts[0] == '0' || $parts[0] == '1')
+          && self::is_associative($doc) && !is_array($doc[$part]))
+      {
+        $doc[$part] = self::do_op(array($doc[$part]), $op, $parts, $value,
+                                  $simplexml_mode);
+      }
+      else
+      {
+        $doc[$part] = self::do_op($doc[$part], $op, $parts, $value,
+                                  $simplexml_mode);
+      }
       return $doc;
     }
 
