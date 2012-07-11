@@ -191,7 +191,9 @@ function do_test($test, $testindex) {
   }
 }      
 
-$tests = json_decode(file_get_contents("..//json-patch-tests/tests.json"), 1);
+$tests = json_decode(file_get_contents("../json-patch-tests/tests.json"), 1);
+/* $tests = json_decode(file_get_contents("../json-patch-tests/simplexml_tests.json"), 1); */
+
 if (is_null($tests)) {
    fatal("problem finding/decoding test file\n");
 }
