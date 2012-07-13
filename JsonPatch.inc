@@ -262,7 +262,7 @@ class JsonPatch
       $json = json_decode($json_str, 1);
       if (is_null($json))
       {
-        throw new JsonPatchException("Invalid JSON:" . $json_str);
+        throw new JsonPatchException("Invalid JSON: " . $json_str);
       }
     }
     return $json;
@@ -388,7 +388,7 @@ class JsonPatch
   {
     $found = self::get_helper($doc, $parts, $simplexml_mode);
 
-    if (!self::compare_arrays($found, $value))
+    if (!self::arrays_are_equal($found, $value))
     {
       throw new JsonPatchException("'test' target value different - expected "
                                    . json_encode($value) . ", found "
@@ -460,7 +460,7 @@ class JsonPatch
   }
 
 
-  private static function compare_arrays($a1, $a2)
+  private static function arrays_are_equal($a1, $a2)
   {
     if (is_array($a1)) $a1 = self::recursive_ksort($a1);
     if (is_array($a2)) $a2 = self::recursive_ksort($a2);
