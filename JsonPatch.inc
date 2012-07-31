@@ -526,8 +526,9 @@ class JsonPatch
       else
       {
         // check range, if numeric
-        if (is_numeric($part) && ($part > count($doc) || $part < 0)
-            || ($op == 'remove' && $part >= count($doc)))
+        if (is_numeric($part) &&
+            ($part < 0 || (($op == 'remove' && $part >= count($doc))
+                           || ($op != 'remove' && $part > count($doc)))))
         {
           throw new JsonPatchException("Can't operate outside of array bounds");
         }
