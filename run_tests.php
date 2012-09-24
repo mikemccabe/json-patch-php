@@ -149,6 +149,52 @@ function do_test($test) {
 }      
 
 
+// Piggyback on patch tests to test diff as well -
+// use 'doc' and 'expected' from testcases.
+// Generate a diff, apply it, and check that it matches the target -
+// in both directions.
+function do_diff_test($test, $testindex) {
+  // Allow 'comment-only' test records
+  if (!(isset($test['doc']) && isset($test['expected'])))
+     return true;
+
+  try {
+    $doc1 = $test['doc']; // copy, in case sort/patch alters
+    $doc2 = $test['expected'];
+    $patch = JsonPatch::diff($doc1, $doc2);
+    $patched = JsonPatch::patch($doc1, $patch);
+    if (is_array($patched)) $patched = rksort($patched);
+    if (is_array($doc2)) $doc2 = rksort($doc2);
+    if (json_encode($patched) !== json_encode($doc2)) {
+      print("$testindex failed:\n");
+      print("diff:     " . json_encode($patch) . "\n");
+      print("found:    " . json_encode($patched) . "\n");
+      print("expected: " . json_encode($doc2) . "\n\n");
+
+      return false;
+    }
+    
+    // reverse order
+    $doc1 = $test['expected']; // copy, in case sort/patch alters
+    $doc2 = $test['doc'];
+    $patch = JsonPatch::diff($doc1, $doc2);
+    $patched = JsonPatch::patch($doc1, $patch);
+    if (is_array($patched)) $patched = rksort($patched);
+    if (is_array($doc2)) $doc2 = rksort($doc2);
+    if (json_encode($patched) !== json_encode($doc2)) {
+      print("$testindex failed:\n");
+      print("diff:     " . json_encode($patch) . "\n");
+      print("found:    " . json_encode($patched) . "\n");
+      print("expected: " . json_encode($doc2) . "\n\n");
+      return false;
+    }
+  } catch (Exception $ex) {
+    print("$testindex: caught exception ".$ex->getMessage()."\n");
+    return false;
+  }
+}
+
+
 function main()
 {
   $testfile = file_get_contents("json-patch-tests/tests.json");
