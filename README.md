@@ -27,3 +27,5 @@ Because of this, empty arrays ([]) and empty objects ({}) compare
 the same, and (for instance) an 'add' of a string key to an empty
 array will succeed in this implementation where it might fail in
 others.
+
+[![Build Status](https://secure.travis-ci.org/mikemccabe/json-patch-php.png)](http://travis-ci.org/mikemccabe/json-patch-php)
