@@ -1,0 +1,7 @@
+before_install:
+  git submodule init && git submodule --quiet update
+language: php
+php:
+  - 5.3
+  - 5.4
+script: php run_tests.php

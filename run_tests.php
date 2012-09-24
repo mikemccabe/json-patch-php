@@ -86,6 +86,8 @@ function json_format($json)
 }
 
 
+// 'Recursive ksort' - prepare a php array s.t. json_encode might produce
+// a canonical string.
 function rksort($array = null) {
   if ($array === null || !is_array($array))
   {
@@ -99,53 +101,7 @@ function rksort($array = null) {
 }
 
 
-// Piggyback on patch tests to test diff as well -
-// use 'doc' and 'expected' from testcases.
-// Generate a diff, apply it, and check that it matches the target -
-// in both directions.
-function do_diff_test($test, $testindex) {
-  // Allow 'comment-only' test records
-  if (!(isset($test['doc']) && isset($test['expected'])))
-     return true;
-
-  try {
-    $doc1 = $test['doc']; // copy, in case sort/patch alters
-    $doc2 = $test['expected'];
-    $patch = JsonPatch::diff($doc1, $doc2);
-    $patched = JsonPatch::patch($doc1, $patch);
-    if (is_array($patched)) $patched = rksort($patched);
-    if (is_array($doc2)) $doc2 = rksort($doc2);
-    if (json_encode($patched) !== json_encode($doc2)) {
-      print("$testindex failed:\n");
-      print("diff:     " . json_encode($patch) . "\n");
-      print("found:    " . json_encode($patched) . "\n");
-      print("expected: " . json_encode($doc2) . "\n\n");
-
-      return false;
-    }
-    
-    // reverse order
-    $doc1 = $test['expected']; // copy, in case sort/patch alters
-    $doc2 = $test['doc'];
-    $patch = JsonPatch::diff($doc1, $doc2);
-    $patched = JsonPatch::patch($doc1, $patch);
-    if (is_array($patched)) $patched = rksort($patched);
-    if (is_array($doc2)) $doc2 = rksort($doc2);
-    if (json_encode($patched) !== json_encode($doc2)) {
-      print("$testindex failed:\n");
-      print("diff:     " . json_encode($patch) . "\n");
-      print("found:    " . json_encode($patched) . "\n");
-      print("expected: " . json_encode($doc2) . "\n\n");
-      return false;
-    }
-  } catch (Exception $ex) {
-    print("$testindex: caught exception ".$ex->getMessage()."\n");
-    return false;
-  }
-}
-
-
-function do_test($test, $testindex) {
+function do_test($test) {
   // Allow 'comment-only' test records
   if (!(isset($test['doc']) && isset($test['patch'])))
      return true;
@@ -153,7 +109,7 @@ function do_test($test, $testindex) {
     $patched =  JsonPatch::patch($test['doc'], $test['patch']);
 
     if (isset($test['error'])) {
-      print("$testindex: failed: expected error didn't occur\n");
+      print("test failed: expected error didn't occur\n");
       print(json_format(json_encode($test)));
       print("\n");
       print("found: ");
@@ -170,7 +126,7 @@ function do_test($test, $testindex) {
     if (is_array($patched)) $patched = rksort($patched);
     if (is_array($test['expected'])) $test['expected'] = rksort($test['expected']);
     if (json_encode($patched) !== json_encode($test['expected'])) {
-      print("$testindex: failed:\n");
+      print("test failed:\n");
       print(json_format(json_encode($test)));
       print("\n");
       print("found:    " . json_encode($patched) . "\n");
@@ -181,7 +137,8 @@ function do_test($test, $testindex) {
     }
   } catch (Exception $ex) {
     if (!isset($test['error'])) {
-      print("$testindex: failed with exception: " . $ex->getMessage() . "\n\n");
+      print("test failed with exception: " . $ex->getMessage() . "\n\n");
+      print(json_format(json_encode($test)));
       return false;
     } else {
 /*       print("$testindex: caught expected error: " . $ex->getMessage() . "\n"); */
@@ -191,21 +148,42 @@ function do_test($test, $testindex) {
   }
 }      
 
-$tests = json_decode(file_get_contents("json-patch-tests/tests.json"), 1);
-/* $tests = json_decode(file_get_contents("../json-patch-tests/simplexml_tests.json"), 1); */
 
-if (is_null($tests)) {
-   fatal("problem finding/decoding test file\n");
+function main()
+{
+  $testfile = file_get_contents("json-patch-tests/tests.json");
+  if (!$testfile)
+  {
+    print("Couldn't find test file json-patch-tests/tests.json\n");
+    return false;
+  }
+
+  $tests = json_decode($testfile, 1);
+  if (is_null($tests)) {
+    print("Error json-decoding test file\n");
+    return false;
+  }
+
+  $success = true;
+  foreach ($tests as $test) {
+    if (isset($test['disabled']))
+      continue;
+    if (!do_test($test))
+    {
+      $success = false;
+    }
+  }
+
+/*   print("Running diff tests\n\n"); */
+  return $success;
 }
-$i = 0;
-foreach ($tests as $test) {
-/*   print("$i\n"); */
-  if (isset($test['disabled']))
-    continue;
 
-  do_test($test, $i);
-  do_diff_test($test, $i);
-  $i++;
+
+
+if (!main())
+{
+  exit(1);
 }
-
-print("\n");
+else {
+  exit(0);
+}
