@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
 Produce and apply json-patch objects.
