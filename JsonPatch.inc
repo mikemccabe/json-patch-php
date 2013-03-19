@@ -89,24 +89,19 @@ class JsonPatch
 
     foreach ($patches as $patch)
     {
-      $found = false;
-      foreach (array('add', 'remove', 'replace', 'move', 'copy', 'test')
-               as $op)
-      {
-        if (isset($patch[$op])) {
-          $location = $patch[$op];
-          $found = true;
-          break;
-        }
+      $op = trim($patch['op']); //one test in tests.json defines "op":" add"
+
+      if (empty($op)) {
+        throw new JsonPatchException("Operation member 'op' missing in "
+          . json_encode($patch));
       }
 
-      if (!$found)
-      {
+      if (!in_array($op, array('add', 'remove', 'replace', 'move', 'copy', 'test'))) {
         throw new JsonPatchException("Unrecognized operation $op in "
-                                     . json_encode($patch));
+          . json_encode($patch));
       }
       
-      $parts = self::decompose_pointer($location);
+      $parts = self::decompose_pointer($patch['path']);
       if (in_array($op, Array('test', 'add', 'replace')))
       {
         $value = $patch['value'];
@@ -392,7 +387,7 @@ class JsonPatch
     {
       throw new JsonPatchException("'test' target value different - expected "
                                    . json_encode($value) . ", found "
-                                   . json_encode($found));;
+                                   . json_encode($found));
     }
   }
 
@@ -510,18 +505,11 @@ class JsonPatch
       throw new JsonPatchException('Target must be array or associative array');
     }
 
-    if (self::is_associative($doc)) // N.B. returns false for empty arrays
-    {
-      if (is_numeric($part))
-      {
-        throw new JsonPatchException('Array operation on object target');
-      }
-    }
-    else
+    if (!self::is_associative($doc)) // N.B. returns false for empty arrays
     {
       if (count($doc) && !is_numeric($part))
       {
-        throw new JsonPatchException('Non-array operation on array target');
+      throw new JsonPatchException('Non-array operation on array target');
       }
       else
       {
@@ -537,13 +525,13 @@ class JsonPatch
 
     if ($op == 'add')
     {
-      if (is_numeric($part))
+      if (!self::is_associative($doc) && is_numeric($part))
       {
         array_splice($doc, $part, 0, Array($value));
       }
       else
       {
-        if (array_key_exists($part, $doc))
+        if (array_key_exists($part, $doc) && !is_null($doc[$part]))
         {
           throw new JsonPatchException("'add' target '$part' already set");
         }
@@ -600,24 +588,19 @@ class JsonPatch
 
     foreach ($patches as $patch)
     {
-      $found = false;
-      foreach (array('add', 'remove', 'replace', 'move', 'copy', 'test')
-               as $op)
-      {
-        if (isset($patch[$op])) {
-          $location = $patch[$op];
-          $found = true;
-          break;
-        }
+      $op = trim($patch['op']); //one test in tests.json defines "op":" add"
+
+      if (empty($op)) {
+        throw new JsonPatchException("Operation member 'op' missing in "
+          . json_encode($patch));
       }
 
-      if (!$found)
-      {
+      if (!in_array($op, array('add', 'remove', 'replace', 'move', 'copy', 'test'))) {
         throw new JsonPatchException("Unrecognized operation $op in "
-                                     . json_encode($patch));
+          . json_encode($patch));
       }
 
-      $parts = self::decompose_pointer($location);
+      $parts = self::decompose_pointer($patch['path']);
       if (in_array($op, Array('test', 'add', 'replace')))
       {
         $value = $patch['value'];
