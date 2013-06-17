@@ -71,7 +71,7 @@ class JsonPatch
     $src = self::json_to_array($src);
     $dst = self::json_to_array($dst);
 
-    return self::diff_values("", $src, $dst);    
+    return self::diff_values("", $src, $dst);
   }
 
 
@@ -100,7 +100,7 @@ class JsonPatch
         throw new JsonPatchException("Unrecognized operation $op in "
           . json_encode($patch));
       }
-      
+
       $parts = self::decompose_pointer($patch['path']);
       if (in_array($op, Array('test', 'add', 'replace')))
       {
@@ -110,7 +110,7 @@ class JsonPatch
       {
         $to_parts = self::decompose_pointer($patch['to']);
       }
-      
+
       if ($op === 'add')
       {
         $doc = self::do_op($doc, $op, $parts, $value, $simplexml_mode);
@@ -123,12 +123,12 @@ class JsonPatch
       {
         $doc = self::do_op($doc, $op, $parts, null, $simplexml_mode);
       }
-      
+
       else if ($op == 'test')
       {
         self::test($doc, $parts, $value, $simplexml_mode);
       }
-      
+
       else if ($op == 'copy')
       {
         $value = self::get_helper($doc, $parts, $simplexml_mode);
@@ -144,10 +144,10 @@ class JsonPatch
 
     if ($simplexml_mode)
       $doc = self::re_singletize($doc);
-    
+
     return $doc;
   }
-  
+
 
   public static function compose_pointer($parts)
   {
@@ -161,7 +161,7 @@ class JsonPatch
     return $result;
   }
 
-  
+
   public static function escape_pointer_part($part)
   {
     $part = str_replace('~', '~0', $part);
@@ -171,7 +171,7 @@ class JsonPatch
 
 
   // Private functions follow
-  
+
   // This one just does leaves
 /*   private static function ds2($doc) { */
 /*     if (!is_array($doc)) */
@@ -279,10 +279,10 @@ class JsonPatch
     return $parts;
   }
 
-  
+
   // diff support functions
-  
-  
+
+
   // Dispatch to a recursive diff_assoc or diff_array call if needed,
   // or emit a patch to replace the current value.
   private static function diff_values($path, $value, $other)
@@ -311,8 +311,8 @@ class JsonPatch
     }
     return array();
   }
-  
-  
+
+
   // Walk associative arrays $src and $dst, returning a list of patches
   private static function diff_assoc($path, $src, $dst)
   {
@@ -391,7 +391,7 @@ class JsonPatch
     }
   }
 
-  
+
   // Helper for get() and 'copy', 'move', 'test' ops - get a value from a doc.
   private static function get_helper($doc, $parts, $simplexml_mode)
   {
@@ -423,7 +423,7 @@ class JsonPatch
 
   // Test whether a php array looks 'associative' - does it have
   // any non-numeric keys?
-  // 
+  //
   // note: is_associative(array()) === false
   private static function is_associative($a)
   {
@@ -609,7 +609,7 @@ class JsonPatch
       {
         $to_parts = self::decompose_pointer($patch['to']);
       }
-      
+
       if ($op === 'add')
       {
         $doc = self::do_op_xml($doc, $op, $parts, $value);
