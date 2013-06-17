@@ -306,7 +306,7 @@ class JsonPatch
     {
       if ($value !== $other)
       {
-        return array(array("replace" => "$path", "value" => $other));
+        return array(array("op" => "replace", "path" => "$path", "value" => $other));
       }
     }
     return array();
@@ -322,7 +322,7 @@ class JsonPatch
       $ekey = self::escape_pointer_part($key);
       if (!array_key_exists($key, $dst))
       {
-        $result[] = array("remove" => "$path/$ekey");
+        $result[] = array("op" => "remove", "path" => "$path/$ekey");
       }
       else
       {
@@ -336,7 +336,7 @@ class JsonPatch
       if (!array_key_exists($key, $src))
       {
         $ekey = self::escape_pointer_part($key);
-        $result[] = array("add" => "$path/$ekey", "value" => $dst[$key]);
+        $result[] = array("op" => "add", "path" => "$path/$ekey", "value" => $dst[$key]);
       }
     }
     return $result;
@@ -363,11 +363,11 @@ class JsonPatch
       }
       else if ($i < $ldst)
       {
-        $result[] = array("add" => "$path/$i", "value" => $dst[$i]);
+        $result[] = array("op" => "add", "path" => "$path/$i", "value" => $dst[$i]);
       }
       else if ($i < $lsrc)
       {
-        $result[] = array("remove" => "$path/$i");
+        $result[] = array("op" => "remove", "path" => "$path/$i");
       }
       $i--;
     }
