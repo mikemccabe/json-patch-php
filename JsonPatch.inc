@@ -1,17 +1,25 @@
 <?php
 
 /*
-Produce and apply json-patch objects.
+.---------------------------------------------------------------------------.
+|  Software: JSON-Patch PHP library                                         |
+|   Version: 0.0.1                                                          |
+|      Site: https://github.com/mikemccabe/json-patch-php                   |
+| ------------------------------------------------------------------------- |
+|   License: TODO???                                                        |
+'---------------------------------------------------------------------------'
 
-Implements the IETF json-patch and json-pointer drafts:
+Produce and apply JSON-patch objects.
 
-http://tools.ietf.org/html/draft-ietf-appsawg-json-patch-02
-http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-02
+Implements the IETF JSON-patch RFC 6902 and JSON-pointer RFC 6901:
+
+http://tools.ietf.org/html/rfc6902
+http://tools.ietf.org/html/rfc6901
 
 Entry points
 ------------
 
-- get($doc, $pointer) - get a value from a json document
+- get($doc, $pointer) - get a value from a JSON document
 - diff($src, $dst) - return patches to create $dst from $src
 - patch($doc, $patches) - apply patches to $doc and return result
 
