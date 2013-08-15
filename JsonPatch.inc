@@ -322,26 +322,30 @@ class JsonPatch
   private static function diff_assoc($path, $src, $dst)
   {
     $result = array();
-    foreach (array_keys($src) as $key)
-    {
-      $ekey = self::escape_pointer_part($key);
-      if (!array_key_exists($key, $dst))
-      {
-        $result[] = array("remove" => "$path/$ekey");
-      }
-      else
-      {
-        $result = array_merge($result,
-                              self::diff_values("$path/$ekey",
-                                                $src[$key], $dst[$key]));
-      }
-    }
-    foreach (array_keys($dst) as $key)
-    {
-      if (!array_key_exists($key, $src))
+    if (count($src) == 0 && count($dst) != 0) {
+      $result[] = array("op" => "replace", "path" => "$path", "value" => $dst);
+    } else {
+      foreach (array_keys($src) as $key)
       {
         $ekey = self::escape_pointer_part($key);
-        $result[] = array("add" => "$path/$ekey", "value" => $dst[$key]);
+        if (!array_key_exists($key, $dst))
+        {
+          $result[] = array("remove" => "$path/$ekey");
+        }
+        else
+        {
+          $result = array_merge($result,
+                                self::diff_values("$path/$ekey",
+                                                  $src[$key], $dst[$key]));
+        }
+      }
+      foreach (array_keys($dst) as $key)
+      {
+        if (!array_key_exists($key, $src))
+        {
+          $ekey = self::escape_pointer_part($key);
+          $result[] = array("add" => "$path/$ekey", "value" => $dst[$key]);
+        }
       }
     }
     return $result;
