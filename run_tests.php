@@ -1,4 +1,4 @@
-<?
+<?php
 
 // This is a simple test jig for testing JsonPatch.inc against
 // the tests in json-patch-tests.
