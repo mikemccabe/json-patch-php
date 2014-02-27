@@ -1,17 +1,25 @@
-<?
+<?php
 
 /*
-Produce and apply json-patch objects.
+.---------------------------------------------------------------------------.
+|  Software: JSON-Patch PHP library                                         |
+|   Version: 0.0.1                                                          |
+|      Site: https://github.com/mikemccabe/json-patch-php                   |
+| ------------------------------------------------------------------------- |
+|   License: TODO???                                                        |
+'---------------------------------------------------------------------------'
 
-Implements the IETF json-patch and json-pointer drafts:
+Produce and apply JSON-patch objects.
 
-http://tools.ietf.org/html/draft-ietf-appsawg-json-patch-02
-http://tools.ietf.org/html/draft-ietf-appsawg-json-pointer-02
+Implements the IETF JSON-patch RFC 6902 and JSON-pointer RFC 6901:
+
+http://tools.ietf.org/html/rfc6902
+http://tools.ietf.org/html/rfc6901
 
 Entry points
 ------------
 
-- get($doc, $pointer) - get a value from a json document
+- get($doc, $pointer) - get a value from a JSON document
 - diff($src, $dst) - return patches to create $dst from $src
 - patch($doc, $patches) - apply patches to $doc and return result
 
@@ -71,7 +79,7 @@ class JsonPatch
     $src = self::json_to_array($src);
     $dst = self::json_to_array($dst);
 
-    return self::diff_values("", $src, $dst);    
+    return self::diff_values("", $src, $dst);
   }
 
 
@@ -89,24 +97,19 @@ class JsonPatch
 
     foreach ($patches as $patch)
     {
-      $found = false;
-      foreach (array('add', 'remove', 'replace', 'move', 'copy', 'test')
-               as $op)
-      {
-        if (isset($patch[$op])) {
-          $location = $patch[$op];
-          $found = true;
-          break;
-        }
+      $op = trim($patch['op']); //one test in tests.json defines "op":" add"
+
+      if (empty($op)) {
+        throw new JsonPatchException("Operation member 'op' missing in "
+          . json_encode($patch));
       }
 
-      if (!$found)
-      {
+      if (!in_array($op, array('add', 'remove', 'replace', 'move', 'copy', 'test'))) {
         throw new JsonPatchException("Unrecognized operation $op in "
-                                     . json_encode($patch));
+          . json_encode($patch));
       }
-      
-      $parts = self::decompose_pointer($location);
+
+      $parts = self::decompose_pointer($patch['path']);
       if (in_array($op, Array('test', 'add', 'replace')))
       {
         $value = $patch['value'];
@@ -115,7 +118,7 @@ class JsonPatch
       {
         $to_parts = self::decompose_pointer($patch['to']);
       }
-      
+
       if ($op === 'add')
       {
         $doc = self::do_op($doc, $op, $parts, $value, $simplexml_mode);
@@ -128,12 +131,12 @@ class JsonPatch
       {
         $doc = self::do_op($doc, $op, $parts, null, $simplexml_mode);
       }
-      
+
       else if ($op == 'test')
       {
         self::test($doc, $parts, $value, $simplexml_mode);
       }
-      
+
       else if ($op == 'copy')
       {
         $value = self::get_helper($doc, $parts, $simplexml_mode);
@@ -149,10 +152,10 @@ class JsonPatch
 
     if ($simplexml_mode)
       $doc = self::re_singletize($doc);
-    
+
     return $doc;
   }
-  
+
 
   public static function compose_pointer($parts)
   {
@@ -166,7 +169,7 @@ class JsonPatch
     return $result;
   }
 
-  
+
   public static function escape_pointer_part($part)
   {
     $part = str_replace('~', '~0', $part);
@@ -176,7 +179,7 @@ class JsonPatch
 
 
   // Private functions follow
-  
+
   // This one just does leaves
 /*   private static function ds2($doc) { */
 /*     if (!is_array($doc)) */
@@ -284,10 +287,10 @@ class JsonPatch
     return $parts;
   }
 
-  
+
   // diff support functions
-  
-  
+
+
   // Dispatch to a recursive diff_assoc or diff_array call if needed,
   // or emit a patch to replace the current value.
   private static function diff_values($path, $value, $other)
@@ -311,13 +314,13 @@ class JsonPatch
     {
       if ($value !== $other)
       {
-        return array(array("replace" => "$path", "value" => $other));
+        return array(array("op" => "replace", "path" => "$path", "value" => $other));
       }
     }
     return array();
   }
-  
-  
+
+
   // Walk associative arrays $src and $dst, returning a list of patches
   private static function diff_assoc($path, $src, $dst)
   {
@@ -330,7 +333,7 @@ class JsonPatch
         $ekey = self::escape_pointer_part($key);
         if (!array_key_exists($key, $dst))
         {
-          $result[] = array("remove" => "$path/$ekey");
+          $result[] = array("op" => "remove", "path" => "$path/$ekey");
         }
         else
         {
@@ -344,7 +347,7 @@ class JsonPatch
         if (!array_key_exists($key, $src))
         {
           $ekey = self::escape_pointer_part($key);
-          $result[] = array("add" => "$path/$ekey", "value" => $dst[$key]);
+          $result[] = array("op" => "add", "path" => "$path/$ekey", "value" => $dst[$key]);
         }
       }
     }
@@ -372,11 +375,11 @@ class JsonPatch
       }
       else if ($i < $ldst)
       {
-        $result[] = array("add" => "$path/$i", "value" => $dst[$i]);
+        $result[] = array("op" => "add", "path" => "$path/$i", "value" => $dst[$i]);
       }
       else if ($i < $lsrc)
       {
-        $result[] = array("remove" => "$path/$i");
+        $result[] = array("op" => "remove", "path" => "$path/$i");
       }
       $i--;
     }
@@ -396,11 +399,11 @@ class JsonPatch
     {
       throw new JsonPatchException("'test' target value different - expected "
                                    . json_encode($value) . ", found "
-                                   . json_encode($found));;
+                                   . json_encode($found));
     }
   }
 
-  
+
   // Helper for get() and 'copy', 'move', 'test' ops - get a value from a doc.
   private static function get_helper($doc, $parts, $simplexml_mode)
   {
@@ -432,7 +435,7 @@ class JsonPatch
 
   // Test whether a php array looks 'associative' - does it have
   // any non-numeric keys?
-  // 
+  //
   // note: is_associative(array()) === false
   private static function is_associative($a)
   {
@@ -514,18 +517,11 @@ class JsonPatch
       throw new JsonPatchException('Target must be array or associative array');
     }
 
-    if (self::is_associative($doc)) // N.B. returns false for empty arrays
-    {
-      if (is_numeric($part))
-      {
-        throw new JsonPatchException('Array operation on object target');
-      }
-    }
-    else
+    if (!self::is_associative($doc)) // N.B. returns false for empty arrays
     {
       if (count($doc) && !is_numeric($part))
       {
-        throw new JsonPatchException('Non-array operation on array target');
+      throw new JsonPatchException('Non-array operation on array target');
       }
       else
       {
@@ -541,13 +537,13 @@ class JsonPatch
 
     if ($op == 'add')
     {
-      if (is_numeric($part))
+      if (!self::is_associative($doc) && is_numeric($part))
       {
         array_splice($doc, $part, 0, Array($value));
       }
       else
       {
-        if (array_key_exists($part, $doc))
+        if (array_key_exists($part, $doc) && !is_null($doc[$part]))
         {
           throw new JsonPatchException("'add' target '$part' already set");
         }
@@ -604,24 +600,19 @@ class JsonPatch
 
     foreach ($patches as $patch)
     {
-      $found = false;
-      foreach (array('add', 'remove', 'replace', 'move', 'copy', 'test')
-               as $op)
-      {
-        if (isset($patch[$op])) {
-          $location = $patch[$op];
-          $found = true;
-          break;
-        }
+      $op = trim($patch['op']); //one test in tests.json defines "op":" add"
+
+      if (empty($op)) {
+        throw new JsonPatchException("Operation member 'op' missing in "
+          . json_encode($patch));
       }
 
-      if (!$found)
-      {
+      if (!in_array($op, array('add', 'remove', 'replace', 'move', 'copy', 'test'))) {
         throw new JsonPatchException("Unrecognized operation $op in "
-                                     . json_encode($patch));
+          . json_encode($patch));
       }
 
-      $parts = self::decompose_pointer($location);
+      $parts = self::decompose_pointer($patch['path']);
       if (in_array($op, Array('test', 'add', 'replace')))
       {
         $value = $patch['value'];
@@ -630,7 +621,7 @@ class JsonPatch
       {
         $to_parts = self::decompose_pointer($patch['to']);
       }
-      
+
       if ($op === 'add')
       {
         $doc = self::do_op_xml($doc, $op, $parts, $value);
