@@ -325,26 +325,30 @@ class JsonPatch
   private static function diff_assoc($path, $src, $dst)
   {
     $result = array();
-    foreach (array_keys($src) as $key)
-    {
-      $ekey = self::escape_pointer_part($key);
-      if (!array_key_exists($key, $dst))
-      {
-        $result[] = array("op" => "remove", "path" => "$path/$ekey");
-      }
-      else
-      {
-        $result = array_merge($result,
-                              self::diff_values("$path/$ekey",
-                                                $src[$key], $dst[$key]));
-      }
-    }
-    foreach (array_keys($dst) as $key)
-    {
-      if (!array_key_exists($key, $src))
+    if (count($src) == 0 && count($dst) != 0) {
+      $result[] = array("op" => "replace", "path" => "$path", "value" => $dst);
+    } else {
+      foreach (array_keys($src) as $key)
       {
         $ekey = self::escape_pointer_part($key);
-        $result[] = array("op" => "add", "path" => "$path/$ekey", "value" => $dst[$key]);
+        if (!array_key_exists($key, $dst))
+        {
+          $result[] = array("op" => "remove", "path" => "$path/$ekey");
+        }
+        else
+        {
+          $result = array_merge($result,
+                                self::diff_values("$path/$ekey",
+                                                  $src[$key], $dst[$key]));
+        }
+      }
+      foreach (array_keys($dst) as $key)
+      {
+        if (!array_key_exists($key, $src))
+        {
+          $ekey = self::escape_pointer_part($key);
+          $result[] = array("op" => "add", "path" => "$path/$ekey", "value" => $dst[$key]);
+        }
       }
     }
     return $result;
@@ -363,17 +367,17 @@ class JsonPatch
     $i = $max - 1;
     while ($i >= 0) // equivalent for loop didn't work?
     {
-      if ($i < $lsrc && $i < $ldst)
+      if ($i < $lsrc && $i < $ldst && isset($src[$i], $dst[$i]))
       {
         $result = array_merge($result,
                               self::diff_values("$path/$i",
                                                 $src[$i], $dst[$i]));
       }
-      else if ($i < $ldst)
+      else if ($i < $ldst && isset($dst[$i]))
       {
         $result[] = array("op" => "add", "path" => "$path/$i", "value" => $dst[$i]);
       }
-      else if ($i < $lsrc)
+      else if ($i < $lsrc && !isset($dst[$i]))
       {
         $result[] = array("op" => "remove", "path" => "$path/$i");
       }
