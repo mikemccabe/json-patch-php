@@ -367,17 +367,17 @@ class JsonPatch
     $i = $max - 1;
     while ($i >= 0) // equivalent for loop didn't work?
     {
-      if ($i < $lsrc && $i < $ldst)
+      if ($i < $lsrc && $i < $ldst && isset($src[$i], $dst[$i]))
       {
         $result = array_merge($result,
                               self::diff_values("$path/$i",
                                                 $src[$i], $dst[$i]));
       }
-      else if ($i < $ldst)
+      else if ($i < $ldst && isset($dst[$i]))
       {
         $result[] = array("op" => "add", "path" => "$path/$i", "value" => $dst[$i]);
       }
-      else if ($i < $lsrc)
+      else if ($i < $lsrc && !isset($dst[$i]))
       {
         $result[] = array("op" => "remove", "path" => "$path/$i");
       }
