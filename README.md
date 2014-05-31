@@ -3,7 +3,7 @@ json-patch-php
 
 Produce and apply json-patch objects.
 
-Implements the IETF JSON-patch RFC 6902 and JSON-pointer RFC 6901:
+Implements IETF JSON-patch RFC 6902 and JSON-pointer RFC 6901:
 
 http://tools.ietf.org/html/rfc6902
 
