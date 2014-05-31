@@ -137,8 +137,8 @@ function do_test($test) {
     }
   } catch (Exception $ex) {
     if (!isset($test['error'])) {
-      print("test failed with exception: " . $ex->getMessage() . "\n\n");
-      print(json_format(json_encode($test)));
+      print("test failed with exception: " . $ex->getMessage() . "\n");
+      print(json_format(json_encode($test)) . "\n\n");
       return false;
     } else {
 /*       print("$testindex: caught expected error: " . $ex->getMessage() . "\n"); */
