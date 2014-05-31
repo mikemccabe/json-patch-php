@@ -97,7 +97,7 @@ class JsonPatch
 
     foreach ($patches as $patch)
     {
-      $op = trim($patch['op']); //one test in tests.json defines "op":" add"
+      $op = $patch['op'];
 
       if (empty($op)) {
         throw new JsonPatchException("Operation member 'op' missing in "
@@ -600,7 +600,7 @@ class JsonPatch
 
     foreach ($patches as $patch)
     {
-      $op = trim($patch['op']); //one test in tests.json defines "op":" add"
+      $op = $patch['op'];
 
       if (empty($op)) {
         throw new JsonPatchException("Operation member 'op' missing in "
