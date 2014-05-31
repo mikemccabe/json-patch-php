@@ -316,7 +316,8 @@ class JsonPatch
     {
       if ($value !== $other)
       {
-        return array(array("op" => "replace", "path" => "$path", "value" => $other));
+        return array(array("op" => "replace", "path" => "$path",
+                           "value" => $other));
       }
     }
     return array();
@@ -352,7 +353,8 @@ class JsonPatch
         if (!array_key_exists($key, $src))
         {
           $ekey = self::escape_pointer_part($key);
-          $result[] = array("op" => "add", "path" => "$path/$ekey", "value" => $dst[$key]);
+          $result[] = array("op" => "add", "path" => "$path/$ekey",
+                            "value" => $dst[$key]);
         }
       }
     }
@@ -380,7 +382,8 @@ class JsonPatch
       }
       else if ($i < $ldst && isset($dst[$i]))
       {
-        $result[] = array("op" => "add", "path" => "$path/$i", "value" => $dst[$i]);
+        $result[] = array("op" => "add", "path" => "$path/$i",
+                          "value" => $dst[$i]);
       }
       else if ($i < $lsrc && !isset($dst[$i]))
       {
@@ -612,7 +615,9 @@ class JsonPatch
                                      . json_encode($patch));
       }
 
-      if (!in_array($op, array('add', 'remove', 'replace', 'move', 'copy', 'test'))) {
+      if (!in_array($op, array('add', 'remove', 'replace',
+                               'move', 'copy', 'test')))
+      {
         throw new JsonPatchException("Unrecognized operation $op in "
                                      . json_encode($patch));
       }
