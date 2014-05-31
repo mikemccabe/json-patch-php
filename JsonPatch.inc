@@ -104,7 +104,9 @@ class JsonPatch
                                      . json_encode($patch));
       }
 
-      if (!in_array($op, array('add', 'remove', 'replace', 'move', 'copy', 'test'))) {
+      if (!in_array($op, array('add', 'remove', 'replace',
+                               'move', 'copy', 'test')))
+      {
         throw new JsonPatchException("Unrecognized operation $op in "
                                      . json_encode($patch));
       }
