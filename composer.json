@@ -2,5 +2,5 @@
   "name": "mikemccabe/json-patch-php",
   "description": "Produce and apply json-patch objects",
   "type": "library",
-  "license": "GPL-2.0"
+  "license": "LGPL-3.0"
 }

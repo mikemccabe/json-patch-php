@@ -6,7 +6,7 @@
 |   Version: 0.0.1                                                          |
 |      Site: https://github.com/mikemccabe/json-patch-php                   |
 | ------------------------------------------------------------------------- |
-|   License: TODO???                                                        |
+|   License: LGPL-3.0
 '---------------------------------------------------------------------------'
 
 Produce and apply JSON-patch objects.
