@@ -1,5 +1,5 @@
 {
-  "name": "mikemccacbe/json-patch-php",
+  "name": "mikemccabe/json-patch-php",
   "description": "Produce and apply json-patch objects",
   "type": "library",
   "license": "GPL-2.0"
