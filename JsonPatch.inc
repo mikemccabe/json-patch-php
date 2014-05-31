@@ -101,12 +101,12 @@ class JsonPatch
 
       if (empty($op)) {
         throw new JsonPatchException("Operation member 'op' missing in "
-          . json_encode($patch));
+                                     . json_encode($patch));
       }
 
       if (!in_array($op, array('add', 'remove', 'replace', 'move', 'copy', 'test'))) {
-        throw new JsonPatchException("Unrecognized operation $op in "
-          . json_encode($patch));
+        throw new JsonPatchException("Unreccognized operation $op in "
+                                     . json_encode($patch));
       }
 
       $parts = self::decompose_pointer($patch['path']);
@@ -604,12 +604,12 @@ class JsonPatch
 
       if (empty($op)) {
         throw new JsonPatchException("Operation member 'op' missing in "
-          . json_encode($patch));
+                                     . json_encode($patch));
       }
 
       if (!in_array($op, array('add', 'remove', 'replace', 'move', 'copy', 'test'))) {
         throw new JsonPatchException("Unrecognized operation $op in "
-          . json_encode($patch));
+                                     . json_encode($patch));
       }
 
       $parts = self::decompose_pointer($patch['path']);
