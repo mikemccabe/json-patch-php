@@ -11,7 +11,7 @@
 
 Produce and apply JSON-patch objects.
 
-Implements the IETF JSON-patch RFC 6902 and JSON-pointer RFC 6901:
+Implements IETF JSON-patch RFC 6902 and JSON-pointer RFC 6901:
 
 http://tools.ietf.org/html/rfc6902
 http://tools.ietf.org/html/rfc6901
@@ -325,9 +325,12 @@ class JsonPatch
   private static function diff_assoc($path, $src, $dst)
   {
     $result = array();
-    if (count($src) == 0 && count($dst) != 0) {
+    if (count($src) == 0 && count($dst) != 0)
+    {
       $result[] = array("op" => "replace", "path" => "$path", "value" => $dst);
-    } else {
+    }
+    else
+    {
       foreach (array_keys($src) as $key)
       {
         $ekey = self::escape_pointer_part($key);
