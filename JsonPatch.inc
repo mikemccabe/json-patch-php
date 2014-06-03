@@ -67,7 +67,7 @@ class JsonPatch
     $doc = self::json_to_array($doc);
 
     $parts = self::decompose_pointer($pointer);
-    return self::get_helper($doc, $parts, $simplexml_mode);
+    return self::get_helper($doc, $pointer, $parts, $simplexml_mode);
   }
 
 
@@ -135,17 +135,19 @@ class JsonPatch
 
       else if ($op == 'test')
       {
-        self::test($doc, $parts, $value, $simplexml_mode);
+        self::test($doc, $patch['path'], $parts, $value, $simplexml_mode);
       }
 
       else if ($op == 'copy')
       {
-        $value = self::get_helper($doc, $parts, $simplexml_mode);
+        $value = self::get_helper($doc, $patch['path'], $parts,
+                                  $simplexml_mode);
         $doc = self::do_op($doc, 'add', $to_parts, $value, $simplexml_mode);
       }
       else if ($op == 'move')
       {
-        $value = self::get_helper($doc, $parts, $simplexml_mode);
+        $value = self::get_helper($doc, $patch['path'], $parts,
+                                  $simplexml_mode);
         $doc = self::do_op($doc, 'remove', $parts, null, $simplexml_mode);
         $doc = self::do_op($doc, 'add', $to_parts, $value, $simplexml_mode);
       }
@@ -398,9 +400,9 @@ class JsonPatch
 
 
   // Implements the 'test' op
-  private static function test($doc, $parts, $value, $simplexml_mode)
+  private static function test($doc, $path, $parts, $value, $simplexml_mode)
   {
-    $found = self::get_helper($doc, $parts, $simplexml_mode);
+    $found = self::get_helper($doc, $path, $parts, $simplexml_mode);
 
     if (!self::arrays_are_equal($found, $value))
     {
@@ -412,12 +414,12 @@ class JsonPatch
 
 
   // Helper for get() and 'copy', 'move', 'test' ops - get a value from a doc.
-  private static function get_helper($doc, $parts, $simplexml_mode)
+  private static function get_helper($doc, $path, $parts, $simplexml_mode)
   {
     $part = array_shift($parts);
     if (!array_key_exists($part, $doc))
     {
-      throw new JsonPatchException("Location '$part' not found in target doc");
+      throw new JsonPatchException("Location '$path' not found in target doc");
     }
     if (count($parts) > 0)
     {
@@ -426,11 +428,13 @@ class JsonPatch
           && ($parts[0] == '0' || $parts[0] == '1')
           && self::is_associative($doc) && !is_array($doc[$part]))
       {
-        return self::get_helper(array($doc[$part]), $parts, $simplexml_mode);
+        return self::get_helper(array($doc[$part]), $path, $parts,
+                                $simplexml_mode);
       }
       else
       {
-        return self::get_helper($doc[$part], $parts, $simplexml_mode);
+        return self::get_helper($doc[$part], $path, $parts,
+                                $simplexml_mode);
       }
     }
     else
