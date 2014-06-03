@@ -65,7 +65,6 @@ class JsonPatch
   public static function get($doc, $pointer, $simplexml_mode=false)
   {
     $doc = self::json_to_array($doc);
-    $pointer = self::json_to_array($pointer);
 
     $parts = self::decompose_pointer($pointer);
     return self::get_helper($doc, $parts, $simplexml_mode);
