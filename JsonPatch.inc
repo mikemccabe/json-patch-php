@@ -642,7 +642,6 @@ class JsonPatch
   }
 
 
-
   // Apply a single op to modify the given document.
   private static function do_op_xml($doc, $op, $parts, $value=null)
   {
