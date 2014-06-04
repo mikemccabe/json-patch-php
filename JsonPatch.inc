@@ -416,31 +416,17 @@ class JsonPatch
   // Helper for get() and 'copy', 'move', 'test' ops - get a value from a doc.
   private static function get_helper($doc, $path, $parts, $simplexml_mode)
   {
+    if (count($parts) == 0)
+    {
+      return $doc;
+    }
+
     $part = array_shift($parts);
-    if (!array_key_exists($part, $doc))
+    if (!is_array($doc) || !array_key_exists($part, $doc))
     {
-      throw new JsonPatchException("Location '$path' not found in target doc");
+      throw new JsonPatchException("Location '$path' not found");
     }
-    if (count($parts) > 0)
-    {
-      if ($simplexml_mode
-          && count($parts) == 1 // XXXmm needed?
-          && ($parts[0] == '0' || $parts[0] == '1')
-          && self::is_associative($doc) && !is_array($doc[$part]))
-      {
-        return self::get_helper(array($doc[$part]), $path, $parts,
-                                $simplexml_mode);
-      }
-      else
-      {
-        return self::get_helper($doc[$part], $path, $parts,
-                                $simplexml_mode);
-      }
-    }
-    else
-    {
-      return $doc[$part];
-    }
+    return self::get_helper($doc[$part], $path, $parts, $simplexml_mode);
   }
 
 
