@@ -117,7 +117,7 @@ class JsonPatch
       }
       if (in_array($op, Array('move', 'copy')))
       {
-        $to_parts = self::decompose_pointer($patch['to']);
+        $from_parts = self::decompose_pointer($patch['from']);
       }
 
       if ($op === 'add')
@@ -140,16 +140,16 @@ class JsonPatch
 
       else if ($op == 'copy')
       {
-        $value = self::get_helper($doc, $patch['path'], $parts,
+        $value = self::get_helper($doc, $patch['path'], $from_parts,
                                   $simplexml_mode);
-        $doc = self::do_op($doc, 'add', $to_parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, 'add', $parts, $value, $simplexml_mode);
       }
       else if ($op == 'move')
       {
-        $value = self::get_helper($doc, $patch['path'], $parts,
+        $value = self::get_helper($doc, $patch['path'], $from_parts,
                                   $simplexml_mode);
-        $doc = self::do_op($doc, 'remove', $parts, null, $simplexml_mode);
-        $doc = self::do_op($doc, 'add', $to_parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, 'remove', $from_parts, null, $simplexml_mode);
+        $doc = self::do_op($doc, 'add', $parts, $value, $simplexml_mode);
       }
     }
 
