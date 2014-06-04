@@ -183,63 +183,6 @@ class JsonPatch
 
   // Private functions follow
 
-  // This one just does leaves
-/*   private static function ds2($doc) { */
-/*     if (!is_array($doc)) */
-/*       return($doc); */
-/*     $result = array(); */
-/*     foreach(array_keys($doc) as $key) */
-/*     { */
-/*       if (self::is_associative($doc) */
-/*           && !(is_array($doc[$key]) || self::is_associative($doc[$key]))) */
-/*       { */
-/*         $result[$key] = array(self::ds2($doc[$key])); */
-/*       } */
-/*       else */
-/*       { */
-/*         $result[$key] = self::ds2($doc[$key]); */
-/*       } */
-/*     } */
-/*     return $result; */
-/*   } */
-
-  // Walk through an associative array and make every value
-  // into an array if it isn't one already.
-/*   private static function de_singletize($doc, $in_array=false) */
-/*   { */
-/*     $result = array(); */
-/*     foreach(array_keys($doc) as $key) */
-/*     { */
-/*       if (!is_array($doc[$key])) */
-/*       { */
-/*         if ($in_array) */
-/*         { */
-/*           $result[$key] = $doc[$key]; */
-/*         } */
-/*         else */
-/*         { */
-/*           $result[$key] = array($doc[$key]); */
-/*         } */
-/*       } */
-/*       else if (self::is_associative($doc[$key])) */
-/*       { */
-/*         if ($in_array) { */
-/*           $result[$key] = self::de_singletize($doc[$key]); */
-/*         } else { */
-/*           $result[$key] = array(self::de_singletize($doc[$key])); */
-/*         } */
-/*       } */
-/*       else */
-/*       { */
-/*         $result[$key] = self::de_singletize($doc[$key], true); */
-/*       } */
-/*     } */
-/*     return $result; */
-/*   } */
-
-/*  <frotz/> -> 0-length array, whereas*/
-/*  <fizz>wizz</fizz> -> "wizz" */
-
 
   // Walk through the doc and turn every 1-length array into a
   // singleton value.  This follows SimpleXML behavior.
