@@ -3,8 +3,6 @@
 // This is a simple test jig for testing JsonPatch.inc against
 // the tests in json-patch-tests.
 
-// Lots of cleanup needed!
-
 require_once('JsonPatch.inc');
 
 function json_format($json)
@@ -101,12 +99,12 @@ function rksort($array = null) {
 }
 
 
-function do_test($test) {
+function do_test($test, $simplexml_mode=false) {
   // Allow 'comment-only' test records
   if (!(isset($test['doc']) && isset($test['patch'])))
      return true;
   try {
-    $patched =  JsonPatch::patch($test['doc'], $test['patch']);
+    $patched =  JsonPatch::patch($test['doc'], $test['patch'], $simplexml_mode);
 
     if (isset($test['error'])) {
       print("test failed: expected error didn't occur\n");
@@ -141,8 +139,8 @@ function do_test($test) {
       print(json_format(json_encode($test)) . "\n\n");
       return false;
     } else {
-/*       print("$testindex: caught expected error: " . $ex->getMessage() . "\n"); */
-/*       print("expected: " . $test['error'] . "\n\n"); */
+      /* print("caught expected error: " . $ex->getMessage() . "\n"); */
+      /* print("expected: " . $test['error'] . "\n\n"); */
       return true;
     }
   }
@@ -195,18 +193,18 @@ function do_diff_test($test, $testindex) {
 }
 
 
-function main()
+function test_file($filename, $simplexml_mode=false)
 {
-  $testfile = file_get_contents("json-patch-tests/tests.json");
+  $testfile = file_get_contents($filename);
   if (!$testfile)
   {
-    print("Couldn't find test file json-patch-tests/tests.json\n");
+    print("Couldn't find test file $filename\n");
     return false;
   }
 
   $tests = json_decode($testfile, 1);
   if (is_null($tests)) {
-    print("Error json-decoding test file\n");
+    print("Error json-decoding test file $filename\n");
     return false;
   }
 
@@ -219,11 +217,31 @@ function main()
       $success = false;
     }
   }
-
-/*   print("Running diff tests\n\n"); */
   return $success;
 }
 
+
+function main()
+{
+  $result = true;
+  $testfiles = array(
+                     'local_tests.json',
+                     'json-patch-tests/tests.json',
+                     'json-patch-tests/spec_tests.json'
+                     );
+  foreach ($testfiles as $testfile)
+  {
+    if (!test_file($testfile))
+    {
+      $result = false;
+    }
+  }
+  if (!test_file('simplexml_tests.json', true))
+  {
+    $result = false;
+  }
+  return $result;
+}
 
 
 if (!main())
