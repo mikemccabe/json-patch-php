@@ -459,9 +459,10 @@ class JsonPatch
 
     if (!self::is_associative($doc)) // N.B. returns false for empty arrays
     {
-      if (count($doc) && !is_numeric($part))
+      if (count($doc) && !is_numeric($part)
+          && !($part == '-' && $op == 'add'))
       {
-      throw new JsonPatchException('Non-array operation on array target');
+        throw new JsonPatchException('Non-array operation on array target');
       }
       else
       {
@@ -477,9 +478,11 @@ class JsonPatch
 
     if ($op == 'add')
     {
-      if (!self::is_associative($doc) && is_numeric($part))
+      if (!self::is_associative($doc) && (is_numeric($part) || $part == '-'))
       {
-        array_splice($doc, $part, 0, Array($value));
+        // If index is '-', use array length
+        $index = ($part == '-') ? count($doc) : $part;
+        array_splice($doc, $index, 0, Array($value));
       }
       else
       {
