@@ -107,7 +107,6 @@ class JsonPatch
       {
         throw new JsonPatchException("path missing in " . json_encode($patch));
       }
-
       if (!in_array($op, array('add', 'remove', 'replace',
                                'move', 'copy', 'test')))
       {
