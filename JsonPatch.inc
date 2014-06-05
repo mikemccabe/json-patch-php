@@ -121,20 +121,21 @@ class JsonPatch
       }
       if (in_array($op, Array('move', 'copy')))
       {
-        $from_parts = self::decompose_pointer($patch['from']);
+        $from_path = $patch['from'];
+        $from_parts = self::decompose_pointer($from_path);
       }
 
       if ($op === 'add')
       {
-        $doc = self::do_op($doc, $op, $parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, $op, $path, $parts, $value, $simplexml_mode);
       }
       else if ($op == 'replace')
       {
-        $doc = self::do_op($doc, $op, $parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, $op, $path, $parts, $value, $simplexml_mode);
       }
       else if ($op == 'remove')
       {
-        $doc = self::do_op($doc, $op, $parts, null, $simplexml_mode);
+        $doc = self::do_op($doc, $op, $path, $parts, null, $simplexml_mode);
       }
 
       else if ($op == 'test')
@@ -144,16 +145,17 @@ class JsonPatch
 
       else if ($op == 'copy')
       {
-        $value = self::get_helper($doc, $path, $from_parts,
+        $value = self::get_helper($doc, $from_path, $from_parts,
                                   $simplexml_mode);
-        $doc = self::do_op($doc, 'add', $parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, 'add', $path, $parts, $value, $simplexml_mode);
       }
       else if ($op == 'move')
       {
-        $value = self::get_helper($doc, $path, $from_parts,
+        $value = self::get_helper($doc, $from_path, $from_parts,
                                   $simplexml_mode);
-        $doc = self::do_op($doc, 'remove', $from_parts, null, $simplexml_mode);
-        $doc = self::do_op($doc, 'add', $parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, 'remove', $from_path, $from_parts, null,
+                           $simplexml_mode);
+        $doc = self::do_op($doc, 'add', $path, $parts, $value, $simplexml_mode);
       }
     }
 
@@ -352,7 +354,7 @@ class JsonPatch
 
     if (!self::arrays_are_equal($found, $value))
     {
-      throw new JsonPatchException("'test' target value different - expected "
+      throw new JsonPatchException("test target value different - expected "
                                    . json_encode($value) . ", found "
                                    . json_encode($found));
     }
@@ -423,7 +425,8 @@ class JsonPatch
   // As php arrays are not passed by reference, this function works
   // recursively, rebuilding complete subarrays that need changing;
   // the revised subarray is changed in the parent array before returning it.
-  private static function do_op($doc, $op, $parts, $value, $simplexml_mode)
+  private static function do_op($doc, $op, $path, $parts, $value,
+                                $simplexml_mode)
   {
     // recur until we get to the target
     $part = array_shift($parts);
@@ -432,7 +435,7 @@ class JsonPatch
     {
       if (!array_key_exists($part, $doc))
       {
-        throw new JsonPatchException("'$op' location '$part' not in target doc");
+        throw new JsonPatchException("location '$path' not in target doc");
       }
       // recur, adding resulting sub-doc into doc returned to caller
 
@@ -443,13 +446,13 @@ class JsonPatch
           && ($parts[0] == '0' || $parts[0] == '1')
           && self::is_associative($doc) && !is_array($doc[$part]))
       {
-        $doc[$part] = self::do_op(array($doc[$part]), $op, $parts, $value,
-                                  $simplexml_mode);
+        $doc[$part] = self::do_op(array($doc[$part]), $op, $path, $parts,
+                                  $value, $simplexml_mode);
       }
       else
       {
-        $doc[$part] = self::do_op($doc[$part], $op, $parts, $value,
-                                  $simplexml_mode);
+        $doc[$part] = self::do_op($doc[$part], $op, $path, $parts,
+                                  $value, $simplexml_mode);
       }
       return $doc;
     }
@@ -503,7 +506,7 @@ class JsonPatch
       {
         if (!array_key_exists($part, $doc))
         {
-          throw new JsonPatchException("'replace' target '$part' not already set");
+          throw new JsonPatchException("replace target '$path' not set");
         }
         $doc[$part] = $value;
       }
@@ -519,7 +522,7 @@ class JsonPatch
       {
         if (!array_key_exists($part, $doc))
         {
-          throw new JsonPatchException("'remove' target '$part' not already set");
+          throw new JsonPatchException("remove target '$path' not set");
         }
         unset($doc[$part]);
       }
