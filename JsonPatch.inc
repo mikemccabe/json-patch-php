@@ -486,10 +486,6 @@ class JsonPatch
       }
       else
       {
-        if (array_key_exists($part, $doc) && !is_null($doc[$part]))
-        {
-          throw new JsonPatchException("'add' target '$part' already set");
-        }
         $doc[$part] = $value;
       }
     }
