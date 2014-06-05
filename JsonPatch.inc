@@ -169,8 +169,7 @@ class JsonPatch
     $result = "";
     foreach($parts as $part)
     {
-      $part = str_replace('~', '~0', $part);
-      $part = str_replace('/', '~1', $part);
+      $part = self::escape_pointer_part($part);
       $result = $result . "/" . $part;
     }
     return $result;
