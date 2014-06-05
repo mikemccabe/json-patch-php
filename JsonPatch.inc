@@ -97,10 +97,15 @@ class JsonPatch
     foreach ($patches as $patch)
     {
       $op = $patch['op'];
+      $path = $patch['path'];
 
-      if (empty($op)) {
-        throw new JsonPatchException("Operation member 'op' missing in "
-                                     . json_encode($patch));
+      if (empty($op))
+      {
+        throw new JsonPatchException("op missing in " . json_encode($patch));
+      }
+      if (empty($path))
+      {
+        throw new JsonPatchException("path missing in " . json_encode($patch));
       }
 
       if (!in_array($op, array('add', 'remove', 'replace',
@@ -110,7 +115,7 @@ class JsonPatch
                                      . json_encode($patch));
       }
 
-      $parts = self::decompose_pointer($patch['path']);
+      $parts = self::decompose_pointer($path);
       if (in_array($op, Array('test', 'add', 'replace')))
       {
         $value = $patch['value'];
@@ -135,18 +140,18 @@ class JsonPatch
 
       else if ($op == 'test')
       {
-        self::test($doc, $patch['path'], $parts, $value, $simplexml_mode);
+        self::test($doc, $path, $parts, $value, $simplexml_mode);
       }
 
       else if ($op == 'copy')
       {
-        $value = self::get_helper($doc, $patch['path'], $from_parts,
+        $value = self::get_helper($doc, $path, $from_parts,
                                   $simplexml_mode);
         $doc = self::do_op($doc, 'add', $parts, $value, $simplexml_mode);
       }
       else if ($op == 'move')
       {
-        $value = self::get_helper($doc, $patch['path'], $from_parts,
+        $value = self::get_helper($doc, $path, $from_parts,
                                   $simplexml_mode);
         $doc = self::do_op($doc, 'remove', $from_parts, null, $simplexml_mode);
         $doc = self::do_op($doc, 'add', $parts, $value, $simplexml_mode);
