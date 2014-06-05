@@ -158,7 +158,9 @@ class JsonPatch
     }
 
     if ($simplexml_mode)
+    {
       $doc = self::re_singletize($doc);
+    }
 
     return $doc;
   }
@@ -192,10 +194,14 @@ class JsonPatch
   private static function re_singletize($doc)
   {
     if (!is_array($doc))
+    {
       return $doc;
+    }
 
     if (isset($doc[0]) && count($doc) == 1)
+    {
       return self::re_singletize($doc[0]);
+    }
 
     $result = array();
     foreach(array_keys($doc) as $key)
@@ -412,8 +418,14 @@ class JsonPatch
 
   private static function arrays_are_equal($a1, $a2)
   {
-    if (is_array($a1)) $a1 = self::recursive_ksort($a1);
-    if (is_array($a2)) $a2 = self::recursive_ksort($a2);
+    if (is_array($a1))
+    {
+      $a1 = self::recursive_ksort($a1);
+    }
+    if (is_array($a2))
+    {
+      $a2 = self::recursive_ksort($a2);
+    }
     return json_encode($a1) === json_encode($a2);
   }
 
@@ -463,8 +475,7 @@ class JsonPatch
 
     if (!self::is_associative($doc)) // N.B. returns false for empty arrays
     {
-      if (count($doc) && !is_numeric($part)
-          && !($part == '-' && $op == 'add'))
+      if (count($doc) && !is_numeric($part) && !($part == '-' && $op == 'add'))
       {
         throw new JsonPatchException('Non-array operation on array target');
       }
