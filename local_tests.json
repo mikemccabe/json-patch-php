@@ -1,6 +1,21 @@
 [
     { "comment": "THESE TESTS SHOULD BE PUSHED UPSTREAM" },
 
+    { "comment": "Adding to \"/-\" adds to the end of the array (ADD BECAUSE SIMPLER)",
+      "doc": [ 1, 2 ],
+      "patch": [ { "op": "add", "path": "/-", "value": 3 } ],
+      "expected": [ 1, 2, 3 ] },
+
+    { "comment": "move target can use '-'?",
+      "doc": { "to":[ 1, 2 ], "from": 3 },
+      "patch": [ { "op": "move", "from":"/from", "path": "/to/-" } ],
+      "expected": { "to":[ 1, 2, 3 ] } },
+
+    { "comment": "copy target can use '-'?",
+      "doc": { "to":[ 1, 2 ], "from": 3 },
+      "patch": [ { "op": "copy", "from":"/from", "path": "/to/-" } ],
+      "expected": { "to":[ 1, 2, 3 ], "from": 3 } },
+
     { "comment": "replace target must exist",
       "doc": {"foo": "bar"},
       "patch": [{"op": "replace", "path": "/baz", "value": "sil"}],
@@ -103,12 +118,14 @@
     { "comment": "Adding to \"/-\" adds to the end of the array",
       "doc": [ 1, 2 ],
       "patch": [ { "op": "add", "path": "/-", "value": { "foo": [ "bar", "baz" ] } } ],
-      "expected": [ 1, 2, { "foo": [ "bar", "baz" ] } ] ,"disabled":true },
+      "expected": [ 1, 2, { "foo": [ "bar", "baz" ] } ] },
+
+
 
     { "comment": "Adding to \"/-\" adds to the end of the array, even n levels down",
       "doc": [ 1, 2, [ 3, [ 4, 5 ] ] ],
       "patch": [ { "op": "add", "path": "/2/1/-", "value": { "foo": [ "bar", "baz" ] } } ],
-      "expected": [ 1, 2, [ 3, [ 4, 5, { "foo": [ "bar", "baz" ] } ] ] ] ,"disabled":true },
+      "expected": [ 1, 2, [ 3, [ 4, 5, { "foo": [ "bar", "baz" ] } ] ] ] },
 
     { "comment": "test remove with bad number should fail",
       "doc": {"foo": 1, "baz": [{"qux": "hello"}]},
