@@ -23,34 +23,32 @@ Entry points
 - diff($src, $dst) - return patches to create $dst from $src
 - patch($doc, $patches) - apply patches to $doc and return result
 
-Arguments are PHP arrays, i.e. the output of
-json_decode($json_string, 1).
+Arguments are PHP arrays, e.g. from json_decode($json_string, 1).
 JSON strings may also be used.
 
 Return values are PHP arrays.
 
-All structures are implemented directly as PHP arrays.
-An array is considered to be 'associative' (e.g. like a JSON 'object')
-if it contains at least one non-numeric key.
+All structures are implemented directly as PHP arrays.  An array is
+considered to be 'associative' (e.g. like a JSON 'object') if it
+contains at least one non-numeric key.
 
-Because of this, empty arrays ([]) and empty objects ({}) compare
-the same, and (for instance) an 'add' of a string key to an empty
-array will succeed in this implementation where it might fail in
-others.
+Because of this, empty arrays ([]) and empty objects ({}) compare the
+same, and (for instance) an 'add' of a string key to an empty array
+will succeed in this implementation where it might fail in others.
 
 $simplexml_mode is provided to help with working with arrays produced
 from XML in the style of simplexml - e.g. repeated XML elements are
 expressed as arrays.  When $simplexml_mode is enabled, leaves with
-scalar values are implicitly treated as length-1 arrays, so this
-test will succeed:
+scalar values are implicitly treated as length-1 arrays, so this test
+will succeed:
 
     { "comment": "basic simplexml array promotion",
       "doc": { "foo":1 },
       "patch": [ { "op":"add", "path":"/foo/1", "value":2 } ],
       "expected": { "foo":[1, 2] } },
 
-Also, when $simplexml_mode is true, 1-length arrays are converted to scalars
-on return from patch().
+Also, when $simplexml_mode is true, 1-length arrays are converted to
+scalars on return from patch().
 
 */
 
