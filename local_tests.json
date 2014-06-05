@@ -87,6 +87,13 @@
 
 
 
+    { "comment": "Toplevel scalar values OK?",
+      "doc": "foo",
+      "patch": [{"op": "replace", "path": "", "value": "bar"}],
+      "expected": "bar",
+    },
+
+
 
 
     { "comment": "Toplevel scalar values OK?",
