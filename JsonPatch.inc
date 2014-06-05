@@ -46,7 +46,7 @@ test will succeed:
 
     { "comment": "basic simplexml array promotion",
       "doc": { "foo":1 },
-      "patch": [ {"add":"/foo/1", "value":2} ],
+      "patch": [ { "op":"add", "path":"/foo/1", "value":2 } ],
       "expected": { "foo":[1, 2] } },
 
 Also, when $simplexml_mode is true, 1-length arrays are converted to scalars
