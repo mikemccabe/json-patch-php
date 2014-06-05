@@ -79,7 +79,28 @@
     "error": "operation has two 'op' members", "disabled":true
   },
 
+    { "comment": "replace patches in below with simpler toplevel doc add" },
+    { "comment": "Ok to have doc as toplevel string?",
+      "doc": "foo",
+      "patch": [{"op": "replace", "path": "", "value": "bar"}],
+      "error": "doc is not a valid JSON-text (object / array) per rfc4627(2)" },
 
+    { "comment": "Ok to have doc as toplevel number?",
+      "doc": 1,
+      "patch": [{"op": "replace", "path": "", "value": "bar"}],
+      "error": "doc is not a valid JSON-text (object / array) per rfc4627(2)" },
+    { "comment": "try these with more kinds of values" },
+
+    { "comment": "Ok to have result doc as toplevel string? (THINKNO)",
+      "doc": [ 1 ],
+      "patch": [{"op": "replace", "path": "", "value": "bar"}],
+      "expected": "bar", "disabled":false },
+
+
+    { "comment": "'add' should replace existing member if it already exists",
+      "doc": { "foo": 1 },
+      "patch": [{"op": "add", "path": "/foo", "value": 2 }],
+      "expected": { "foo": 2 } },
 
 
 
@@ -87,20 +108,9 @@
 
 
 
-    { "comment": "Toplevel scalar values OK?",
-      "doc": "foo",
-      "patch": [{"op": "replace", "path": "", "value": "bar"}],
-      "expected": "bar",
-    },
 
 
 
-
-    { "comment": "Toplevel scalar values OK?",
-      "doc": "foo",
-      "patch": [{"op": "replace", "path": "", "value": "bar"}],
-      "expected": "bar",
-      "disabled": true },
 
     { "comment": "replace whole document",
       "doc": {"foo": "bar"},
