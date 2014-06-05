@@ -103,7 +103,7 @@ class JsonPatch
       {
         throw new JsonPatchException("op missing in " . json_encode($patch));
       }
-      if (empty($path))
+      if (!is_string($path))
       {
         throw new JsonPatchException("path missing in " . json_encode($patch));
       }
