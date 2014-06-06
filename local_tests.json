@@ -1,6 +1,36 @@
 [
     { "comment": "THESE TESTS SHOULD BE PUSHED UPSTREAM" },
 
+    { "comment": "missing 'value' parameter to add",
+      "doc": [ 1 ],
+      "patch": [ { "op": "add", "path": "/-" } ],
+      "error": "add operation is missing value parameter" },
+
+    { "comment": "missing 'value' parameter to replace",
+      "doc": [ 1 ],
+      "patch": [ { "op": "replace", "path": "/0" } ],
+      "error": "test operation is missing value parameter" },
+
+    { "comment": "missing 'value' parameter to test",
+      "doc": [ null ],
+      "patch": [ { "op": "test", "path": "/0" } ],
+      "error": "test operation is missing value parameter" },
+
+    { "comment": "missing value parameter to test - impls where undef is falsy",
+      "doc": [ false ],
+      "patch": [ { "op": "test", "path": "/0" } ],
+      "error": "test operation is missing value parameter" },
+
+    { "comment": "missing from parameter to copy",
+      "doc": [ 1 ],
+      "patch": [ { "op": "copy", "path": "/-" } ],
+      "error": "copy operation is missing from parameter" },
+
+    { "comment": "missing from parameter to move",
+      "doc": { "foo": 1 },
+      "patch": [ { "op": "move", "path": "" } ],
+      "error": "move operation is missing from parameter" },
+
     { "comment": "Adding to \"/-\" adds to the end of the array (ADD BECAUSE SIMPLER)",
       "doc": [ 1, 2 ],
       "patch": [ { "op": "add", "path": "/-", "value": 3 } ],
@@ -20,6 +50,12 @@
       "doc": {"foo": "bar"},
       "patch": [{"op": "replace", "path": "/baz", "value": "sil"}],
       "error": "replace target not already set" },
+
+    { "comment": "what should this behavior be?"},
+    { "comment": "- as remove target",
+      "doc": [1, 2],
+      "patch": [{"op": "remove", "path": "/-"}],
+      "expected": [1], "disabled":true },
 
     { "doc": {
             "foo": ["bar", "baz"],
@@ -108,24 +144,19 @@
 
 
 
-
-
-
-
     { "comment": "replace whole document",
       "doc": {"foo": "bar"},
       "patch": [{"op": "replace", "path": "", "value": {"baz": "qux"}}],
-      "expected": {"baz": "qux"} ,"disabled":true },
+      "expected": {"baz": "qux"} },
 
-    { "comment": "spurious patch properties",
+    { "comment": "spurious patch properties are OK",
       "doc": {"foo": 1},
       "patch": [{"op": "test", "path": "/foo", "value": 1, "spurious": 1}],
       "expected": {"foo": 1} },
 
     { "comment": "Whole document",
       "doc": { "foo": 1 },
-      "patch": [{"op": "test", "path": "", "value": {"foo": 1}}],
-      "disabled": true },
+      "patch": [{"op": "test", "path": "", "value": {"foo": 1}}] },
 
     { "comment": "replacing the root of the document is possible with add",
       "doc": {"foo": "bar"},
@@ -198,7 +229,7 @@
     "patch": [{ "op": "add", "path": "/foo/-", "value": ["abc", "def"] }],
     "expected": {
       "foo": ["bar", ["abc", "def"]]
-    }, "disabled":true
+    }
   },
 
     { "comment": "last" }
