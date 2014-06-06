@@ -1,4 +1,13 @@
 [
+
+    { "comment": "blur arrays and objects",
+      "doc": { "foo": 1 },
+      "patch": [ { "op": "add", "path": "/1", "value": 2 } ],
+      "expected": { "foo": 1, "1": 2 } },
+
+
+
+
     { "comment": "THESE TESTS SHOULD BE PUSHED UPSTREAM" },
 
     { "comment": "missing 'value' parameter to add",
@@ -30,6 +39,12 @@
       "doc": { "foo": 1 },
       "patch": [ { "op": "move", "path": "" } ],
       "error": "move operation is missing from parameter" },
+
+
+
+
+
+
 
     { "comment": "Adding to \"/-\" adds to the end of the array (ADD BECAUSE SIMPLER)",
       "doc": [ 1, 2 ],
@@ -117,20 +132,21 @@
 
     { "comment": "replace patches in below with simpler toplevel doc add" },
     { "comment": "Ok to have doc as toplevel string?",
-      "doc": "foo",
+      "doc": 1,
       "patch": [{"op": "replace", "path": "", "value": "bar"}],
-      "error": "doc is not a valid JSON-text (object / array) per rfc4627(2)" },
+      "expected": "bar" },
 
     { "comment": "Ok to have doc as toplevel number?",
       "doc": 1,
-      "patch": [{"op": "replace", "path": "", "value": "bar"}],
-      "error": "doc is not a valid JSON-text (object / array) per rfc4627(2)" },
+      "patch": [{"op": "replace", "path": "", "value": 1}],
+      "expected": 1 },
+
     { "comment": "try these with more kinds of values" },
 
     { "comment": "Ok to have result doc as toplevel string? (THINKNO)",
       "doc": [ 1 ],
       "patch": [{"op": "replace", "path": "", "value": "bar"}],
-      "expected": "bar", "disabled":false },
+      "expected": "bar" },
 
 
     { "comment": "'add' should replace existing member if it already exists",
@@ -161,7 +177,7 @@
     { "comment": "replacing the root of the document is possible with add",
       "doc": {"foo": "bar"},
       "patch": [{"op": "add", "path": "", "value": {"baz": "qux"}}],
-      "expected": {"baz":"qux"} ,"disabled":true },
+      "expected": {"baz":"qux"} },
 
     { "comment": "Adding to \"/-\" adds to the end of the array",
       "doc": [ 1, 2 ],
@@ -181,9 +197,9 @@
       "error": "remove op shouldn't remove from array with bad number" },
 
     { "comment": "test replace with bad number should fail",
-      "doc": [""],
+      "doc": [1, 2],
       "patch": [{"op": "replace", "path": "/1e0", "value": false}],
-      "error": "replace op shouldn't replace in array with bad number" ,"disabled":true },
+      "error": "replace op shouldn't replace in array with bad number" },
 
     { "comment": "test copy with bad number should fail AND ERROR IS INCORRECT",
       "doc": {"baz": [1,2,3], "bar": 1},
