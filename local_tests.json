@@ -204,17 +204,17 @@
     { "comment": "test copy with bad number should fail AND ERROR IS INCORRECT",
       "doc": {"baz": [1,2,3], "bar": 1},
       "patch": [{"op": "copy", "from": "/baz/1e0", "path": "/boo"}],
-      "error": "copy op shouldn't work with bad number" ,"disabled":true },
+      "error": "copy op shouldn't work with bad number" },
 
     { "comment": "test move with bad number should fail AND ERROR MAYBEBAD",
       "doc": {"foo": 1, "baz": [1,2,3,4]},
       "patch": [{"op": "move", "from": "/baz/1e0", "path": "/foo"}],
-      "error": "move op shouldn't work with bad number"  ,"disabled":true },
+      "error": "move op shouldn't work with bad number" },
 
     { "comment": "test add with bad number should fail",
       "doc": ["foo", "sil"],
       "patch": [{"op": "add", "path": "/1e0", "value": "bar"}],
-      "error": "add op shouldn't add to array with bad number", "disabled":true },
+      "error": "add op shouldn't add to array with bad number" },
 
  {
     "comment": "A.13 Invalid JSON Patch Document OTHER ERROR MASKS REQUESTED AND MAYBE THIS SHOULD BE DISABLED???",
@@ -225,27 +225,6 @@
   { "op": "add", "path": "/baz", "value": "qux", "op": "remove" }
 ],
     "error": "operation has two 'op' members", "disabled":true
-  },
-
-  {
-    "comment": "A.15. Comparing Strings and Numbers NEEDS DECONFLATED THO NOTE PRECEDING",
-    "doc": {
-       "/": 9,
-       "~1": 10
-    },
-    "patch": [{"op": "test", "path": "/~01", "value": "10"}],
-    "error": "number is not equal to string", "disabled": true
-  },
-
-  {
-    "comment": "A.16. Adding an Array Value",
-    "doc": {
-       "foo": ["bar"]
-    },
-    "patch": [{ "op": "add", "path": "/foo/-", "value": ["abc", "def"] }],
-    "expected": {
-      "foo": ["bar", ["abc", "def"]]
-    }
   },
 
     { "comment": "last" }
