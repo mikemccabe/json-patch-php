@@ -448,9 +448,26 @@ class JsonPatch
   private static function do_op($doc, $op, $path, $parts, $value,
                                 $simplexml_mode)
   {
-    // recur until we get to the target
+    // Special-case toplevel
+    if (count($parts) == 0)
+    {
+      if ($op == 'add' || $op == 'replace')
+      {
+        return $value;
+      }
+      else if ($op == 'remove')
+      {
+        throw new JsonPatchException("Can't remove whole document");
+      }
+      else
+      {
+        throw new JsonPatchException("'$op' can't operate on whole document");
+      }
+    }
+
     $part = array_shift($parts);
 
+    // recur until we get to the target
     if (count($parts) > 0)
     {
       if (!array_key_exists($part, $doc))
