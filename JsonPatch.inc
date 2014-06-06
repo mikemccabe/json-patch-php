@@ -115,7 +115,7 @@ class JsonPatch
       $parts = self::decompose_pointer($path);
       if (in_array($op, Array('test', 'add', 'replace')))
       {
-        if (!in_array('value', $patch))
+        if (!array_key_exists('value', $patch))
         {
           throw new JsonPatchException("value missing in " .
                                        json_encode($patch));
