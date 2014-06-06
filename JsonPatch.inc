@@ -253,6 +253,13 @@ class JsonPatch
   }
 
 
+  // only 0 or counting number; '1e0' is excluded.
+  private static function is_index($part)
+  {
+    return 1 === preg_match('/^(0|[1-9][0-9]*)$/', $part);
+  }
+
+
   // diff support functions
 
 
@@ -502,14 +509,15 @@ class JsonPatch
 
     if (!self::is_associative($doc)) // N.B. returns false for empty arrays
     {
-      if (count($doc) && !is_numeric($part) && !($part == '-' && $op == 'add'))
+      if (count($doc) && !self::is_index($part)
+          && !($part == '-' && $op == 'add'))
       {
         throw new JsonPatchException('Non-array operation on array target');
       }
       else
       {
         // check range, if numeric
-        if (is_numeric($part) &&
+        if (self::is_index($part) &&
             ($part < 0 || (($op == 'remove' && $part >= count($doc))
                            || ($op != 'remove' && $part > count($doc)))))
         {
@@ -520,7 +528,8 @@ class JsonPatch
 
     if ($op == 'add')
     {
-      if (!self::is_associative($doc) && (is_numeric($part) || $part == '-'))
+      if (!self::is_associative($doc)
+          && (self::is_index($part) || $part == '-'))
       {
         // If index is '-', use array length
         $index = ($part == '-') ? count($doc) : $part;
@@ -534,7 +543,7 @@ class JsonPatch
 
     else if ($op == 'replace')
     {
-      if (is_numeric($part))
+      if (self::is_index($part))
       {
         array_splice($doc, $part, 1, Array($value));
       }
@@ -550,7 +559,7 @@ class JsonPatch
 
     else if ($op == 'remove')
     {
-      if (is_numeric($part))
+      if (self::is_index($part))
       {
         array_splice($doc, $part, 1);
       }
