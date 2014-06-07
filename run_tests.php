@@ -112,7 +112,7 @@ function do_test($test, $simplexml_mode=false) {
       print("\n");
       print("found: ");
       print json_encode($patched);
-      print("\n");
+      print("\n\n");
     }
 
     if (!isset($test['expected'])) {
@@ -139,8 +139,8 @@ function do_test($test, $simplexml_mode=false) {
       print(json_format(json_encode($test)) . "\n\n");
       return false;
     } else {
-      /* print("caught expected error: " . $ex->getMessage() . "\n"); */
-      /* print("expected: " . $test['error'] . "\n\n"); */
+      print("caught expected error: " . $ex->getMessage() . "\n");
+      print("expected: " . $test['error'] . "\n\n");
       return true;
     }
   }
@@ -236,10 +236,10 @@ function main()
       $result = false;
     }
   }
-  if (!test_file('simplexml_tests.json', true))
-  {
-    $result = false;
-  }
+  /* if (!test_file('simplexml_tests.json', true)) */
+  /* { */
+  /*   $result = false; */
+  /* } */
   return $result;
 }
 
