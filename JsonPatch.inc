@@ -99,11 +99,13 @@ class JsonPatch
 
       if (empty($op))
       {
-        throw new JsonPatchException("op missing in " . json_encode($patch));
+        throw new JsonPatchException("'op' missing in "
+                                     . json_encode($patch));
       }
       if (!is_string($path))
       {
-        throw new JsonPatchException("path missing in " . json_encode($patch));
+        throw new JsonPatchException("'path' missing in "
+                                     . json_encode($patch));
       }
       if (!in_array($op, array('add', 'remove', 'replace',
                                'move', 'copy', 'test')))
@@ -117,8 +119,8 @@ class JsonPatch
       {
         if (!array_key_exists('value', $patch))
         {
-          throw new JsonPatchException("'value' missing in " .
-                                       json_encode($patch));
+          throw new JsonPatchException("'value' missing in "
+                                       . json_encode($patch));
         }
         $value = $patch['value'];
       }
@@ -126,8 +128,8 @@ class JsonPatch
       {
         if (!array_key_exists('from', $patch))
         {
-          throw new JsonPatchException("'from' missing in " .
-                                       json_encode($patch));
+          throw new JsonPatchException("'from' missing in "
+                                       . json_encode($patch));
         }
         $from_path = $patch['from'];
         $from_parts = self::decompose_pointer($from_path);
