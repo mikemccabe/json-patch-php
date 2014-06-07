@@ -375,7 +375,7 @@ class JsonPatch
   {
     $found = self::get_helper($doc, $path, $parts, $simplexml_mode);
 
-    if (!self::arrays_are_equal($found, $value))
+    if (!self::values_are_deepequal($found, $value))
     {
       throw new JsonPatchException("test target value different - expected "
                                    . json_encode($value) . ", found "
@@ -435,7 +435,7 @@ class JsonPatch
   }
 
 
-  private static function arrays_are_equal($a1, $a2)
+  private static function values_are_deepequal($a1, $a2)
   {
     if (is_array($a1))
     {
