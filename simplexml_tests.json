@@ -1,27 +1,22 @@
 [
-    { "comment": "empty list, empty docs",
-      "doc": {},
-      "patch": [],
-      "expected": {} },
-
     { "comment": "basic simplexml promotion",
       "doc": { "foo":1 },
-      "patch": [ {"add":"/foo/1", "value":2} ],
+      "patch": [ { "op":"add", "path":"/foo/1", "value":2 } ],
       "expected": { "foo":[1, 2] } },
 
     { "comment": "Add 1-length array is equivalent to scalar add",
       "doc": { },
-      "patch": [ {"add":"/foo/0", "value":1} ],
+      "patch": [ { "op":"add", "path":"/foo/0", "value":1 } ],
       "expected": { "foo":1 } },
 
     { "comment": "replace as array",
       "doc": { "foo":1 },
-      "patch": [ {"replace":"/foo/0", "value":2} ],
+      "patch": [ { "op":"replace", "path":"/foo/0", "value":2 } ],
       "expected": { "foo":2 } },
 
     { "comment": "remove penultimate demotes to singleton",
       "doc": { "foo":[1, 2] },
-      "patch": [ {"remove":"/foo/1"} ],
+      "patch": [ { "op":"remove", "path":"/foo/1"} ],
       "expected": { "foo":1 } },
 
     { "comment": "tests complete" }
