@@ -40,11 +40,12 @@
       "patch": [ { "op": "move", "path": "" } ],
       "error": "move operation is missing from parameter" },
 
-
-
-
-
-
+    { "comment": "duplicate ops",
+      "doc": { "foo": "bar" },
+      "patch": [ { "op": "add", "path": "/baz", "value": "qux",
+                   "op": "move", "from":"/foo" } ],
+      "error": "operation has two 'op' members",
+      "disabled", true },
 
     { "comment": "Adding to \"/-\" adds to the end of the array (ADD BECAUSE SIMPLER)",
       "doc": [ 1, 2 ],
@@ -72,43 +73,6 @@
       "patch": [{"op": "remove", "path": "/-"}],
       "expected": [1], "disabled":true },
 
-    { "doc": {
-            "foo": ["bar", "baz"],
-            "": 0,
-            "a/b": 1,
-            "c%d": 2,
-            "e^f": 3,
-            "g|h": 4,
-            "i\\j": 5,
-            "k\"l": 6,
-            " ": 7,
-            "m~n": 8
-            },
-      "patch": [{"op": "test", "path": "/foo", "value": ["bar", "baz"]},
-                {"op": "test", "path": "/foo/0", "value": "bar"},
-                {"op": "test", "path": "",
-                 "value": { "foo": ["bar", "baz"],
-                            "": 0,
-                            "a/b": 1,
-                            "c%d": 2,
-                            "e^f": 3,
-                            "g|h": 4,
-                            "i\\j": 5,
-                            "k\"l": 6,
-                            " ": 7,
-                            "m~n": 8
-                          }
-                },
-                {"op": "test", "path": "/", "value": 0},
-                {"op": "test", "path": "/a~1b", "value": 1},
-                {"op": "test", "path": "/c%d", "value": 2},
-                {"op": "test", "path": "/e^f", "value": 3},
-                {"op": "test", "path": "/g|h", "value": 4},
-                {"op": "test", "path":  "/i\\j", "value": 5},
-                {"op": "test", "path": "/k\"l", "value": 6},
-                {"op": "test", "path": "/ ", "value": 7},
-                {"op": "test", "path": "/m~0n", "value": 8}] },
-
     { "comment": "unrecognized op should fail (4.1)",
       "doc": {"foo": 1},
       "patch": [{"op": "spam", "path": "/foo", "value": 1}],
@@ -117,18 +81,6 @@
     { "doc": [""],
       "patch": [{"op": "replace", "path": "/0", "value": ""}],
       "expected": [""] },
-
-
- {
-    "comment": "A.13 Invalid JSON Patch Document OTHER ERROR MASKS REQUESTED AND MAYBE THIS SHOULD BE DISABLED???",
-    "doc": {
-     "foo": "bar"
-    },
-    "patch": [
-  { "op": "add", "path": "/baz", "value": "qux", "op": "remove" }
-],
-    "error": "operation has two 'op' members", "disabled":true
-  },
 
     { "comment": "replace patches in below with simpler toplevel doc add" },
     { "comment": "Ok to have doc as toplevel string?",
@@ -148,48 +100,53 @@
       "patch": [{"op": "replace", "path": "", "value": "bar"}],
       "expected": "bar" },
 
-
     { "comment": "'add' should replace existing member if it already exists",
       "doc": { "foo": 1 },
       "patch": [{"op": "add", "path": "/foo", "value": 2 }],
       "expected": { "foo": 2 } },
 
 
+    { "comment": "test op with string at toplevel",
+      "doc": "foo",
+      "patch": [{"op": "test", "path":"", "value": "foo"}] },
+      
+    { "comment": "test op with number at toplevel",
+      "doc": 1,
+      "patch": [{"op": "test", "path":"", "value": 1}] },
+      
+    { "comment": "test op with false at toplevel",
+      "doc": false,
+      "patch": [{"op": "test", "path":"", "value": false}] },
+
+    { "comment": "test op with true at toplevel",
+      "doc": true,
+      "patch": [{"op": "test", "path":"", "value": true}] },
+
+    { "comment": "test op with null at toplevel",
+      "doc": null,
+      "patch": [{"op": "test", "path":"", "value": null}] },
+
+    { "comment": "test null != false",
+      "doc": null,
+      "patch": [{"op": "test", "path":"", "value": false}],
+      "error": "expected false value not found" },
+
+    { "comment": "test false != null",
+      "doc": false,
+      "patch": [{"op": "test", "path":"", "value": null}],
+      "error": "expected null value not found" },
+
+    { "comment": "test emptystr != false",
+      "doc": "",
+      "patch": [{"op": "test", "path":"", "value": false}],
+      "error": "expected false value not found" },
+
+    { "comment": "test false != emptystr",
+      "doc": false,
+      "patch": [{"op": "test", "path":"", "value": ""}],
+      "error": "expected empty string value not found" },
 
     { "comment": "THESE BELOW ARE FAILURES" },
-
-
-
-    { "comment": "replace whole document",
-      "doc": {"foo": "bar"},
-      "patch": [{"op": "replace", "path": "", "value": {"baz": "qux"}}],
-      "expected": {"baz": "qux"} },
-
-    { "comment": "spurious patch properties are OK",
-      "doc": {"foo": 1},
-      "patch": [{"op": "test", "path": "/foo", "value": 1, "spurious": 1}],
-      "expected": {"foo": 1} },
-
-    { "comment": "Whole document",
-      "doc": { "foo": 1 },
-      "patch": [{"op": "test", "path": "", "value": {"foo": 1}}] },
-
-    { "comment": "replacing the root of the document is possible with add",
-      "doc": {"foo": "bar"},
-      "patch": [{"op": "add", "path": "", "value": {"baz": "qux"}}],
-      "expected": {"baz":"qux"} },
-
-    { "comment": "Adding to \"/-\" adds to the end of the array",
-      "doc": [ 1, 2 ],
-      "patch": [ { "op": "add", "path": "/-", "value": { "foo": [ "bar", "baz" ] } } ],
-      "expected": [ 1, 2, { "foo": [ "bar", "baz" ] } ] },
-
-
-
-    { "comment": "Adding to \"/-\" adds to the end of the array, even n levels down",
-      "doc": [ 1, 2, [ 3, [ 4, 5 ] ] ],
-      "patch": [ { "op": "add", "path": "/2/1/-", "value": { "foo": [ "bar", "baz" ] } } ],
-      "expected": [ 1, 2, [ 3, [ 4, 5, { "foo": [ "bar", "baz" ] } ] ] ] },
 
     { "comment": "test remove with bad number should fail",
       "doc": {"foo": 1, "baz": [{"qux": "hello"}]},
@@ -211,21 +168,28 @@
       "patch": [{"op": "move", "from": "/baz/1e0", "path": "/foo"}],
       "error": "move op shouldn't work with bad number" },
 
-    { "comment": "test add with bad number should fail",
-      "doc": ["foo", "sil"],
-      "patch": [{"op": "add", "path": "/1e0", "value": "bar"}],
-      "error": "add op shouldn't add to array with bad number" },
 
- {
-    "comment": "A.13 Invalid JSON Patch Document OTHER ERROR MASKS REQUESTED AND MAYBE THIS SHOULD BE DISABLED???",
-    "doc": {
-     "foo": "bar"
+    { "comment": "null within string",
+      "doc": [ "foo\u0000foo" ],
+      "patch": [{"op":"test", "path":"/0", "value":"foo\u0000foo"}] },
+
+    { "comment": "null string",
+      "doc": [ "\u0000" ],
+      "patch": [{"op":"test", "path":"/0", "value":"\u0000"}] },
+
+    { "comment": "null in key",
+      "doc": { "foo\u0000foo": 1 },
+      "patch": [{"op":"replace", "path":"/foo\u0000foo", "value":2}],
+      "expected": { "foo\u0000foo": 2 } },
+
+    { "comment": "null as key - this is a PHP Fatal error",
+      "doc": { "\u0000": 1 },
+      "patch": [{"op":"replace", "path":"/\u0000", "value":2}],
+      "expected": { "\u0000": 2 },
+      "disabled": true
     },
-    "patch": [
-  { "op": "add", "path": "/baz", "value": "qux", "op": "remove" }
-],
-    "error": "operation has two 'op' members", "disabled":true
-  },
+
+
 
     { "comment": "last" }
 ]
