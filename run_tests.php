@@ -198,14 +198,13 @@ function test_file($filename, $simplexml_mode=false)
   $testfile = file_get_contents($filename);
   if (!$testfile)
   {
-    print("Couldn't find test file $filename\n");
+    throw new Exception("Couldn't find test file $filename");
     return false;
   }
 
   $tests = json_decode($testfile, 1);
   if (is_null($tests)) {
-    print("Error json-decoding test file $filename\n");
-    return false;
+    throw new Exception("Error json-decoding test file $filename");
   }
 
   $success = true;
