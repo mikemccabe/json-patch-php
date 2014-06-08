@@ -45,7 +45,7 @@
       "patch": [ { "op": "add", "path": "/baz", "value": "qux",
                    "op": "move", "from":"/foo" } ],
       "error": "operation has two 'op' members",
-      "disabled", true },
+      "disabled": true },
 
     { "comment": "Adding to \"/-\" adds to the end of the array (ADD BECAUSE SIMPLER)",
       "doc": [ 1, 2 ],
@@ -72,6 +72,12 @@
       "doc": [1, 2],
       "patch": [{"op": "remove", "path": "/-"}],
       "expected": [1], "disabled":true },
+
+    { "comment": "what should this behavior be?"},
+    { "comment": "toplevel as remove target",
+      "doc": [1],
+      "patch": [{"op": "remove", "path": ""}],
+      "error": "Can't remove whole document" },
 
     { "comment": "unrecognized op should fail (4.1)",
       "doc": {"foo": 1},
@@ -148,6 +154,23 @@
 
     { "comment": "THESE BELOW ARE FAILURES" },
 
+    { "comment": "should have at least one test with 01" },
+
+    { "comment": "bad number (in intermediate path location)",
+      "doc": [[0,[1]]],
+      "patch": [{"op": "test", "path": "/0/1e0/0", "value": 1}],
+      "error": "path '/0/1e0/0' not found in doc" },
+
+    { "comment": "bad number (in intermediate path location)",
+      "doc": [[0,[1]]],
+      "patch": [{"op": "test", "path": "/0/01/0", "value": 1}],
+      "error": "path '/0/01/0' not found in doc" },
+
+    { "comment": "Don't convert number representation for object lookup",
+      "doc": { "1e0": 1 },
+      "patch": [{"op": "test", "path": "/1", "value": 1}],
+      "error": "path '/1' not found in doc" },
+
     { "comment": "test remove with bad number should fail",
       "doc": {"foo": 1, "baz": [{"qux": "hello"}]},
       "patch": [{"op": "remove", "path": "/baz/1e0/qux"}],
@@ -163,7 +186,7 @@
       "patch": [{"op": "copy", "from": "/baz/1e0", "path": "/boo"}],
       "error": "copy op shouldn't work with bad number" },
 
-    { "comment": "test move with bad number should fail AND ERROR MAYBEBAD",
+    { "comment": "test move with bad number should fai",
       "doc": {"foo": 1, "baz": [1,2,3,4]},
       "patch": [{"op": "move", "from": "/baz/1e0", "path": "/foo"}],
       "error": "move op shouldn't work with bad number" },
@@ -182,12 +205,31 @@
       "patch": [{"op":"replace", "path":"/foo\u0000foo", "value":2}],
       "expected": { "foo\u0000foo": 2 } },
 
+    { "comment": "null in key - test against prefix",
+      "doc": { "foo": 1, "foo\u0000foo": 2 },
+      "patch": [{"op":"test", "path":"/foo\u0000foo", "value":2}] },
+
+    { "comment": "null in key - trailing",
+      "doc": { "foo": 1, "foo\u0000": 2 },
+      "patch": [{"op":"test", "path":"/foo\u0000", "value":2}] },
+
     { "comment": "null as key - this is a PHP Fatal error",
       "doc": { "\u0000": 1 },
       "patch": [{"op":"replace", "path":"/\u0000", "value":2}],
       "expected": { "\u0000": 2 },
       "disabled": true
     },
+
+    { "comment": "copy doc onto child",
+      "doc": { "foo": 1 },
+      "patch": [{"op":"copy", "from":"", "path":"/bar"}],
+      "expected": { "foo": 1, "bar": { "foo": 1 }} },
+
+    { "comment": "move doc onto child (from location must not be proper prefix)",
+      "doc": { "foo": { "bar": 1 } },
+      "patch": [{"op":"move", "from":"/foo", "path":"/foo/bar"}],
+      "error": "location not in target doc (already removed)"},
+
 
 
 
