@@ -5,82 +5,23 @@
 
 require_once('JsonPatch.inc');
 
-function json_format($json)
+function print_test($test)
 {
-  $tab = "  ";
-  $new_json = "";
-  $indent_level = 0;
-  $in_string = false;
-  
-  $json_obj = json_decode($json);
-  
-  if($json_obj === false)
-    return false;
-  
-  $json = json_encode($json_obj);
-  $len = strlen($json);
-  
-  for($c = 0; $c < $len; $c++)
+  print "{ ";
+  $first = true;
+  foreach(array('comment', 'doc', 'patch', 'expected', 'error') as $key)
   {
-    $char = $json[$c];
-    switch($char)
+    if (array_key_exists($key, $test))
     {
-    case '{':
-    case '[':
-      if(!$in_string)
+      if (!$first)
       {
-        $new_json .= $char . "\n" . str_repeat($tab, $indent_level+1);
-        $indent_level++;
+        print ",\n  ";
       }
-      else
-      {
-        $new_json .= $char;
-      }
-      break;
-    case '}':
-    case ']':
-      if(!$in_string)
-      {
-        $indent_level--;
-        $new_json .= "\n" . str_repeat($tab, $indent_level) . $char;
-      }
-      else
-      {
-        $new_json .= $char;
-      }
-      break;
-    case ',':
-      if(!$in_string)
-      {
-        $new_json .= ",\n" . str_repeat($tab, $indent_level);
-      }
-      else
-      {
-        $new_json .= $char;
-      }
-      break;
-    case ':':
-      if(!$in_string)
-      {
-        $new_json .= ": ";
-      }
-      else
-      {
-        $new_json .= $char;
-      }
-      break;
-    case '"':
-      if($c > 0 && $json[$c-1] != '\\')
-      {
-        $in_string = !$in_string;
-      }
-    default:
-      $new_json .= $char;
-      break;                   
+      $first = false;
+      print("\"$key\": " . json_encode($test[$key]));
     }
   }
-  
-  return $new_json;
+  print " }\n";
 }
 
 
@@ -108,8 +49,7 @@ function do_test($test, $simplexml_mode=false) {
 
     if (isset($test['error'])) {
       print("test failed: expected error didn't occur\n");
-      print(json_format(json_encode($test)));
-      print("\n");
+      print_test($test);
       print("found: ");
       print json_encode($patched);
       print("\n\n");
@@ -125,10 +65,8 @@ function do_test($test, $simplexml_mode=false) {
     if (is_array($test['expected'])) $test['expected'] = rksort($test['expected']);
     if (json_encode($patched) !== json_encode($test['expected'])) {
       print("test failed:\n");
-      print(json_format(json_encode($test)));
-      print("\n");
-      print("found:    " . json_encode($patched) . "\n");
-      print("expected: " . json_encode($test['expected']) . "\n\n");
+      print_test($test);
+      print("found: " . json_encode($patched) . "\n\n");
       return false;
     } else {
       return true;
@@ -136,7 +74,7 @@ function do_test($test, $simplexml_mode=false) {
   } catch (Exception $ex) {
     if (!isset($test['error'])) {
       print("test failed with exception: " . $ex->getMessage() . "\n");
-      print(json_format(json_encode($test)) . "\n\n");
+      print_test($test);
       return false;
     } else {
       print("caught expected error: " . $ex->getMessage() . "\n");
@@ -147,12 +85,11 @@ function do_test($test, $simplexml_mode=false) {
 }      
 
 
-// Piggyback on patch tests to test diff as well -
-// use 'doc' and 'expected' from testcases.
-// Generate a diff, apply it, and check that it matches the target -
-// in both directions.
-function do_diff_test($test, $testindex) {
-  // Allow 'comment-only' test records
+// Piggyback on patch tests to test diff as well - use 'doc' and
+// 'expected' from testcases.  Generate a diff, apply it, and check
+// that it matches the target - in both directions.
+function do_diff_test($test) {
+  // Skip comment-only or test op tests
   if (!(isset($test['doc']) && isset($test['expected'])))
      return true;
 
@@ -164,7 +101,7 @@ function do_diff_test($test, $testindex) {
     if (is_array($patched)) $patched = rksort($patched);
     if (is_array($doc2)) $doc2 = rksort($doc2);
     if (json_encode($patched) !== json_encode($doc2)) {
-      print("$testindex failed:\n");
+      print("diff test failed:\n");
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
       print("expected: " . json_encode($doc2) . "\n\n");
@@ -180,14 +117,14 @@ function do_diff_test($test, $testindex) {
     if (is_array($patched)) $patched = rksort($patched);
     if (is_array($doc2)) $doc2 = rksort($doc2);
     if (json_encode($patched) !== json_encode($doc2)) {
-      print("$testindex failed:\n");
+      print("reverse diff test failed:\n");
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
       print("expected: " . json_encode($doc2) . "\n\n");
       return false;
     }
   } catch (Exception $ex) {
-    print("$testindex: caught exception ".$ex->getMessage()."\n");
+    print("caught exception ".$ex->getMessage()."\n");
     return false;
   }
 }
@@ -247,6 +184,7 @@ if (!main())
 {
   exit(1);
 }
-else {
+else
+{
   exit(0);
 }
