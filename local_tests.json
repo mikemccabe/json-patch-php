@@ -7,32 +7,32 @@
     { "comment": "missing 'value' parameter to add",
       "doc": [ 1 ],
       "patch": [ { "op": "add", "path": "/-" } ],
-      "error": "add op is missing 'value' parameter" },
+      "error": "missing 'value' parameter" },
 
     { "comment": "missing 'value' parameter to replace",
       "doc": [ 1 ],
       "patch": [ { "op": "replace", "path": "/0" } ],
-      "error": "test op is missing 'value' parameter" },
+      "error": "missing 'value' parameter" },
 
     { "comment": "missing 'value' parameter to test",
       "doc": [ null ],
       "patch": [ { "op": "test", "path": "/0" } ],
-      "error": "test op is missing 'value' parameter" },
+      "error": "missing 'value' parameter" },
 
-    { "comment": "missing value parameter to test - impls where undef is falsy",
+    { "comment": "missing value parameter to test - where undef is falsy",
       "doc": [ false ],
       "patch": [ { "op": "test", "path": "/0" } ],
-      "error": "test op is missing 'value' parameter" },
+      "error": "missing 'value' parameter" },
 
     { "comment": "missing from parameter to copy",
       "doc": [ 1 ],
       "patch": [ { "op": "copy", "path": "/-" } ],
-      "error": "copy op is missing 'from' parameter" },
+      "error": "missing 'from' parameter" },
 
     { "comment": "missing from parameter to move",
       "doc": { "foo": 1 },
       "patch": [ { "op": "move", "path": "" } ],
-      "error": "move op is missing 'from' parameter" },
+      "error": "missing 'from' parameter" },
 
     { "comment": "duplicate ops",
       "doc": { "foo": "bar" },
@@ -41,38 +41,42 @@
       "error": "patch has two 'op' members",
       "disabled": true },
 
-    { "comment": "Adding to \"/-\" adds to the end of the array (ADD BECAUSE SIMPLER)",
+    { "comment": "Adding to \"/-\" adds to the end of the array",
       "doc": [ 1, 2 ],
       "patch": [ { "op": "add", "path": "/-", "value": 3 } ],
       "expected": [ 1, 2, 3 ] },
 
-    { "comment": "move target can use '-'?",
-      "doc": { "to":[ 1, 2 ], "from": 3 },
-      "patch": [ { "op": "move", "from":"/from", "path": "/to/-" } ],
-      "expected": { "to":[ 1, 2, 3 ] } },
+    { "comment": "value in array append not flattened",
+      "doc": [1, 2],
+      "patch": [{"op": "add", "path": "/-", "value": [3]}],
+      "expected": [1, 2, [3]] },
 
-    { "comment": "copy target can use '-'?",
-      "doc": { "to":[ 1, 2 ], "from": 3 },
-      "patch": [ { "op": "copy", "from":"/from", "path": "/to/-" } ],
+    { "comment": "move target can use '-'",
+      "doc": {"to":[ 1, 2 ], "from": 3},
+      "patch": [{"op": "move", "from":"/from", "path": "/to/-"}],
+      "expected": {"to":[ 1, 2, 3 ]}},
+
+    { "comment": "copy target can use '-'",
+      "doc": {"to":[1, 2], "from": 3},
+      "patch": [{"op": "copy", "from": "/from", "path": "/to/-"}],
       "expected": { "to":[ 1, 2, 3 ], "from": 3 } },
 
     { "comment": "replace target must exist",
       "doc": {"foo": "bar"},
       "patch": [{"op": "replace", "path": "/baz", "value": "sil"}],
-      "error": "replace target '/baz' not already set" },
+      "error": "replace target '/baz' not set" },
 
     { "comment": "- as remove target not allowed",
       "doc": [1, 2],
       "patch": [{"op": "remove", "path": "/-"}],
       "error": "Non-array key '-' used on array" },
 
-    { "comment": "what should this behavior be?"},
     { "comment": "toplevel as remove target",
       "doc": [1],
       "patch": [{"op": "remove", "path": ""}],
       "error": "Can't remove whole document" },
 
-    { "comment": "unrecognized op should fail (4.1)",
+    { "comment": "unrecognized op should fail",
       "doc": {"foo": 1},
       "patch": [{"op": "spam", "path": "/foo", "value": 1}],
       "error": "Unrecognized op 'spam'" },
@@ -94,16 +98,15 @@
 
     { "comment": "try these with more kinds of values" },
 
-    { "comment": "Ok to have result doc as toplevel string? (THINKNO)",
+    { "comment": "Ok to have result doc as toplevel string?",
       "doc": [ 1 ],
       "patch": [{"op": "replace", "path": "", "value": "bar"}],
       "expected": "bar" },
 
     { "comment": "'add' should replace existing member if it already exists",
       "doc": { "foo": 1 },
-      "patch": [{"op": "add", "path": "/foo", "value": 2 }],
+      "patch": [{"op": "add", "path": "/foo", "value": 2}],
       "expected": { "foo": 2 } },
-
 
     { "comment": "test op with string at toplevel",
       "doc": "foo",
@@ -133,21 +136,22 @@
     { "comment": "test false != null",
       "doc": false,
       "patch": [{"op": "test", "path":"", "value": null}],
-      "error": "expected null value not found" },
+      "error": "test target value different - expected null, found false" },
+
+    { "comment": "test null != false",
+      "doc": null,
+      "patch": [{"op": "test", "path":"", "value": false}],
+      "error": "test target value different - expected false, found null" },
 
     { "comment": "test emptystr != false",
       "doc": "",
       "patch": [{"op": "test", "path":"", "value": false}],
-      "error": "expected false value not found" },
+      "error": "test target value different - expected false, found \"\"" },
 
     { "comment": "test false != emptystr",
       "doc": false,
       "patch": [{"op": "test", "path":"", "value": ""}],
-      "error": "expected empty string value not found" },
-
-    { "comment": "THESE BELOW ARE FAILURES" },
-
-    { "comment": "should have at least one test with 01" },
+      "error": "test target value different - expected \"\", found false" },
 
     { "comment": "bad number (in intermediate path location)",
       "doc": [[0,[1]]],
@@ -162,28 +166,31 @@
     { "comment": "Don't convert number representation for object lookup",
       "doc": { "1e0": 1 },
       "patch": [{"op": "test", "path": "/1", "value": 1}],
-      "error": "path '/1' not found in doc" },
+      "error": "path '/1' not found" },
+
+    { "comment": "Don't convert number representation for object lookup",
+      "doc": { "1e0": 1 },
+      "patch": [{"op": "test", "path": "/1e0", "value": 1}] },
 
     { "comment": "test remove with bad number should fail",
       "doc": {"foo": 1, "baz": [{"qux": "hello"}]},
       "patch": [{"op": "remove", "path": "/baz/1e0/qux"}],
-      "error": "remove op shouldn't remove from array with bad number" },
+      "error": "Path '/baz/1e0/qux' not found" },
 
     { "comment": "test replace with bad number should fail",
       "doc": [1, 2],
       "patch": [{"op": "replace", "path": "/1e0", "value": false}],
-      "error": "replace op shouldn't replace in array with bad number" },
+      "error": "non-array key '1e0' used on array" },
 
-    { "comment": "test copy with bad number should fail AND ERROR IS INCORRECT",
+    { "comment": "test copy with bad number should fail",
       "doc": {"baz": [1,2,3], "bar": 1},
       "patch": [{"op": "copy", "from": "/baz/1e0", "path": "/boo"}],
-      "error": "copy op shouldn't work with bad number" },
+      "error": "path '/baz/1e0' not found" },
 
     { "comment": "test move with bad number should fai",
       "doc": {"foo": 1, "baz": [1,2,3,4]},
       "patch": [{"op": "move", "from": "/baz/1e0", "path": "/foo"}],
-      "error": "move op shouldn't work with bad number" },
-
+      "error": "path '/baz/1e0' not found" },
 
     { "comment": "null within string",
       "doc": [ "foo\u0000foo" ],
@@ -209,14 +216,12 @@
     { "comment": "null as key",
       "doc": { "\u0000": 1 },
       "patch": [{"op":"replace", "path":"/\u0000", "value":2}],
-      "expected": { "\u0000": 2 }
-    },
+      "expected": { "\u0000": 2 } },
 
     { "comment": "null as key prefix",
       "doc": { "\u0000foo": 1 },
       "patch": [{"op":"replace", "path":"/\u0000foo", "value":2}],
-      "expected": { "\u0000foo": 2 }
-    },
+      "expected": { "\u0000foo": 2 } },
 
     { "comment": "copy doc onto child",
       "doc": { "foo": 1 },
@@ -226,7 +231,7 @@
     { "comment": "move doc onto child ('from' must not be proper prefix)",
       "doc": { "foo": { "bar": 1 } },
       "patch": [{"op":"move", "from":"/foo", "path":"/foo/bar"}],
-      "error": "location not in target doc (already removed)"},
+      "error": "path '/foo/bar' not found (already removed)"},
 
     { "comment": "need bounds check on intermediate path",
       "doc": [1, [2]],

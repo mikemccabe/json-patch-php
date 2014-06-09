@@ -102,7 +102,7 @@ class JsonPatch
       if (!in_array($op, array('add', 'remove', 'replace',
                                'move', 'copy', 'test')))
       {
-        throw new JsonPatchException("Unrecognized operation '$op' in "
+        throw new JsonPatchException("Unrecognized op '$op' in "
                                      . json_encode($patch));
       }
 
@@ -221,7 +221,7 @@ class JsonPatch
     $parts = explode('/', $pointer);
     if (array_shift($parts) !== "")
     {
-      throw new JsonPatchException("Location must start with / in $pointer");
+      throw new JsonPatchException("path must start with / in $pointer");
     }
     for ($i = 0; $i < count($parts); $i++)
     {
@@ -372,7 +372,7 @@ class JsonPatch
     $part = array_shift($parts);
     if (!is_array($doc) || !array_key_exists($part, $doc))
     {
-      throw new JsonPatchException("Location '$path' not found");
+      throw new JsonPatchException("Path '$path' not found");
     }
     return self::get_helper($doc[$part], $path, $parts, $simplexml_mode);
   }
@@ -454,7 +454,7 @@ class JsonPatch
     {
       if (!array_key_exists($part, $doc))
       {
-        throw new JsonPatchException("Location '$path' not in document");
+        throw new JsonPatchException("Path '$path' not found");
       }
       // recur, adding resulting sub-doc into doc returned to caller
 
@@ -487,7 +487,7 @@ class JsonPatch
       if (count($doc) && !self::is_index($part)
           && !($part == '-' && $op == 'add'))
       {
-        throw new JsonPatchException("Non-array key '$part' on array target");
+        throw new JsonPatchException("Non-array key '$part' used on array");
       }
       else
       {

@@ -59,7 +59,11 @@ function do_test($test, $simplexml_mode=false)
     }
     else
     {
-      return true;
+      if (array_key_exists('comment', $test))
+      {
+        print "OK " . $test['comment'] . "\n\n";
+        return true;
+      }
     }
   }
   catch (Exception $ex)
@@ -73,7 +77,11 @@ function do_test($test, $simplexml_mode=false)
     }
     else
     {
-      print("caught expected error: " . $ex->getMessage() . "\n");
+      if (array_key_exists('comment', $test))
+      {
+        print "OK " . $test['comment'] . "\n";
+      }
+      print("caught:   " . $ex->getMessage() . "\n");
       print("expected: " . $test['error'] . "\n\n");
       return true;
     }
