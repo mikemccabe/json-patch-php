@@ -454,7 +454,7 @@ class JsonPatch
     {
       if (!array_key_exists($part, $doc))
       {
-        throw new JsonPatchException("location '$path' not in target doc");
+        throw new JsonPatchException("Location '$path' not in document");
       }
       // recur, adding resulting sub-doc into doc returned to caller
 
@@ -487,7 +487,7 @@ class JsonPatch
       if (count($doc) && !self::is_index($part)
           && !($part == '-' && $op == 'add'))
       {
-        throw new JsonPatchException('Non-array operation on array target');
+        throw new JsonPatchException("Non-array key '$part' on array target");
       }
       else
       {
