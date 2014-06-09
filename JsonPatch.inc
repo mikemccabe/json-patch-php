@@ -3,7 +3,7 @@
 /*
 .---------------------------------------------------------------------------.
 |  Software: JSON-Patch PHP library                                         |
-|   Version: 0.0.1                                                          |
+|   Version: 0.0.2                                                          |
 |      Site: https://github.com/mikemccabe/json-patch-php                   |
 | ------------------------------------------------------------------------- |
 |   License: LGPL-3.0
@@ -62,8 +62,6 @@ class JsonPatch
   // the designated leaf value
   public static function get($doc, $pointer, $simplexml_mode=false)
   {
-    $doc = self::json_to_array($doc);
-
     $parts = self::decompose_pointer($pointer);
     return self::get_helper($doc, $pointer, $parts, $simplexml_mode);
   }
@@ -73,9 +71,6 @@ class JsonPatch
   // between $src and $dst
   public static function diff($src, $dst)
   {
-    $src = self::json_to_array($src);
-    $dst = self::json_to_array($dst);
-
     return self::diff_values("", $src, $dst);
   }
 
@@ -83,9 +78,6 @@ class JsonPatch
   // Compute a new document from the supplied $doc and $patches.
   public static function patch($doc, $patches, $simplexml_mode=false)
   {
-    $doc = self::json_to_array($doc);
-    $patches = self::json_to_array($patches);
-
     // accept singleton patches
     if (count($patches) != 0 && !isset($patches[0]))
     {
@@ -221,21 +213,6 @@ class JsonPatch
       $result[$key] = self::re_singletize($doc[$key]);
     }
     return $result;
-  }
-
-
-  private static function json_to_array($json)
-  {
-    if (!is_array($json))
-    {
-      $json_str = $json;
-      $json = json_decode($json_str, 1);
-      if (is_null($json))
-      {
-        throw new JsonPatchException("Invalid JSON: " . $json_str);
-      }
-    }
-    return $json;
   }
 
 
