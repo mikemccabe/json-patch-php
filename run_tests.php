@@ -25,14 +25,17 @@ function print_test($test)
 }
 
 
-function do_test($test, $simplexml_mode=false) {
+function do_test($test, $simplexml_mode=false)
+{
   // Allow 'comment-only' test records
   if (!(isset($test['doc']) && isset($test['patch'])))
-     return true;
-  try {
+    return true;
+  try
+  {
     $patched =  JsonPatch::patch($test['doc'], $test['patch'], $simplexml_mode);
 
-    if (isset($test['error'])) {
+    if (isset($test['error']))
+    {
       print("test failed: expected error didn't occur\n");
       print_test($test);
       print("found: ");
@@ -40,7 +43,8 @@ function do_test($test, $simplexml_mode=false) {
       print("\n\n");
     }
 
-    if (!isset($test['expected'])) {
+    if (!isset($test['expected']))
+    {
       return true;
     }
 
@@ -52,15 +56,22 @@ function do_test($test, $simplexml_mode=false) {
       print_test($test);
       print("found: " . json_encode($patched) . "\n\n");
       return false;
-    } else {
+    }
+    else
+    {
       return true;
     }
-  } catch (Exception $ex) {
-    if (!isset($test['error'])) {
+  }
+  catch (Exception $ex)
+  {
+    if (!isset($test['error']))
+    {
       print("test failed with exception: " . $ex->getMessage() . "\n");
       print_test($test);
       return false;
-    } else {
+    }
+    else
+    {
       print("caught expected error: " . $ex->getMessage() . "\n");
       print("expected: " . $test['error'] . "\n\n");
       return true;
@@ -76,9 +87,12 @@ function do_diff_test($test)
 {
   // Skip comment-only or test op tests
   if (!(isset($test['doc']) && isset($test['expected'])))
+  {
      return true;
+  }
 
-  try {
+  try
+  {
     $doc1 = $test['doc']; // copy, in case sort/patch alters
     $doc2 = $test['expected'];
     $patch = JsonPatch::diff($doc1, $doc2);
@@ -106,7 +120,9 @@ function do_diff_test($test)
       print("expected: " . json_encode($doc2) . "\n\n");
       return false;
     }
-  } catch (Exception $ex) {
+  }
+  catch (Exception $ex)
+  {
     print("caught exception ".$ex->getMessage()."\n");
     return false;
   }
@@ -123,14 +139,18 @@ function test_file($filename, $simplexml_mode=false)
   }
 
   $tests = json_decode($testfile, 1);
-  if (is_null($tests)) {
+  if (is_null($tests))
+  {
     throw new Exception("Error json-decoding test file $filename");
   }
 
   $success = true;
-  foreach ($tests as $test) {
+  foreach ($tests as $test)
+  {
     if (isset($test['disabled']))
+    {
       continue;
+    }
     if (!do_test($test))
     {
       $success = false;
