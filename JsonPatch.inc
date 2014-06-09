@@ -399,18 +399,18 @@ class JsonPatch
   }
 
   // Recursively sort array keys
-  private static function rksort($array)
+  private static function rksort($a)
   {
-    if (!is_array($array))
+    if (!is_array($a))
     {
-      return $array;
+      return $a;
     }
-    foreach (array_keys($array) as $key)
+    foreach (array_keys($a) as $key)
     {
-      $array[$key] = self::rksort($array[$key]);
+      $a[$key] = self::rksort($a[$key]);
     }
-    ksort($array);
-    return $array;
+    ksort($a);
+    return $a;
   }
 
 
