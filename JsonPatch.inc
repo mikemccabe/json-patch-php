@@ -412,7 +412,7 @@ class JsonPatch
   }
 
 
-  private static function values_are_deepequal($a1, $a2)
+  public static function values_are_deepequal($a1, $a2)
   {
     if (is_array($a1))
     {
@@ -430,7 +430,8 @@ class JsonPatch
   //
   // As php arrays are not passed by reference, this function works
   // recursively, rebuilding complete subarrays that need changing;
-  // the revised subarray is changed in the parent array before returning it.
+  // the revised subarray is changed in the parent array before
+  // returning it.
   private static function do_op($doc, $op, $path, $parts, $value,
                                 $simplexml_mode)
   {
