@@ -398,18 +398,18 @@ class JsonPatch
     return false;
   }
 
-
-  private static function recursive_ksort($array)
+  // Recursively sort array keys
+  private static function rksort($array)
   {
     if (!is_array($array))
     {
       return $array;
     }
-    ksort($array);
     foreach (array_keys($array) as $key)
     {
-      $array[$key] = self::recursive_ksort($array[$key]);
+      $array[$key] = self::rksort($array[$key]);
     }
+    ksort($array);
     return $array;
   }
 
@@ -417,15 +417,7 @@ class JsonPatch
   // Per http://tools.ietf.org/html/rfc6902#section-4.6
   public static function considered_equal($a1, $a2)
   {
-    if (is_array($a1))
-    {
-      $a1 = self::recursive_ksort($a1);
-    }
-    if (is_array($a2))
-    {
-      $a2 = self::recursive_ksort($a2);
-    }
-    return json_encode($a1) === json_encode($a2);
+    return json_encode(self::rksort($a1)) === json_encode(self::rksort($a2));
   }
 
 
