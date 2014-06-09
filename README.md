@@ -28,4 +28,12 @@ the same, and (for instance) an 'add' of a string key to an empty
 array will succeed in this implementation where it might fail in
 others.
 
+Tests
+-----
+
+Some tests are in a submodule
+(https://github.com/json-patch/json-patch-tests).  Do 'git submodule
+init' to pull these, then 'php runtests.php' to run them.
+
+
 [![Build Status](https://secure.travis-ci.org/mikemccabe/json-patch-php.png)](http://travis-ci.org/mikemccabe/json-patch-php)
