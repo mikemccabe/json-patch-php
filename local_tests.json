@@ -1,12 +1,8 @@
 [
-
     { "comment": "blur arrays and objects",
       "doc": { "foo": 1 },
       "patch": [ { "op": "add", "path": "/1", "value": 2 } ],
       "expected": { "foo": 1, "1": 2 } },
-
-
-
 
     { "comment": "THESE TESTS SHOULD BE PUSHED UPSTREAM" },
 
@@ -231,6 +227,15 @@
       "error": "location not in target doc (already removed)"},
 
 
+    { "comment": "need bounds check on intermediate path",
+      "doc": [1, [2]],
+      "patch": [{"op": "test", "path":"/2/0", "value": 2}],
+      "error": "path '/2/0' not in target doc" },
+
+    { "comment": "'-' should be legit member for assoc array",
+      "doc": {"foo": 1},
+      "patch": [{"op": "add", "path":"/-", "value": 2}],
+      "expected": {"foo": 1, "-": 2} },
 
 
     { "comment": "last" }
