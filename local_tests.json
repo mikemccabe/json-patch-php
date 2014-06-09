@@ -4,43 +4,41 @@
       "patch": [ { "op": "add", "path": "/1", "value": 2 } ],
       "expected": { "foo": 1, "1": 2 } },
 
-    { "comment": "THESE TESTS SHOULD BE PUSHED UPSTREAM" },
-
     { "comment": "missing 'value' parameter to add",
       "doc": [ 1 ],
       "patch": [ { "op": "add", "path": "/-" } ],
-      "error": "add operation is missing value parameter" },
+      "error": "add op is missing 'value' parameter" },
 
     { "comment": "missing 'value' parameter to replace",
       "doc": [ 1 ],
       "patch": [ { "op": "replace", "path": "/0" } ],
-      "error": "test operation is missing value parameter" },
+      "error": "test op is missing 'value' parameter" },
 
     { "comment": "missing 'value' parameter to test",
       "doc": [ null ],
       "patch": [ { "op": "test", "path": "/0" } ],
-      "error": "test operation is missing value parameter" },
+      "error": "test op is missing 'value' parameter" },
 
     { "comment": "missing value parameter to test - impls where undef is falsy",
       "doc": [ false ],
       "patch": [ { "op": "test", "path": "/0" } ],
-      "error": "test operation is missing value parameter" },
+      "error": "test op is missing 'value' parameter" },
 
     { "comment": "missing from parameter to copy",
       "doc": [ 1 ],
       "patch": [ { "op": "copy", "path": "/-" } ],
-      "error": "copy operation is missing from parameter" },
+      "error": "copy op is missing 'from' parameter" },
 
     { "comment": "missing from parameter to move",
       "doc": { "foo": 1 },
       "patch": [ { "op": "move", "path": "" } ],
-      "error": "move operation is missing from parameter" },
+      "error": "move op is missing 'from' parameter" },
 
     { "comment": "duplicate ops",
       "doc": { "foo": "bar" },
       "patch": [ { "op": "add", "path": "/baz", "value": "qux",
                    "op": "move", "from":"/foo" } ],
-      "error": "operation has two 'op' members",
+      "error": "patch has two 'op' members",
       "disabled": true },
 
     { "comment": "Adding to \"/-\" adds to the end of the array (ADD BECAUSE SIMPLER)",
@@ -61,13 +59,12 @@
     { "comment": "replace target must exist",
       "doc": {"foo": "bar"},
       "patch": [{"op": "replace", "path": "/baz", "value": "sil"}],
-      "error": "replace target not already set" },
+      "error": "replace target '/baz' not already set" },
 
-    { "comment": "what should this behavior be?"},
-    { "comment": "- as remove target",
+    { "comment": "- as remove target not allowed",
       "doc": [1, 2],
       "patch": [{"op": "remove", "path": "/-"}],
-      "expected": [1], "disabled":true },
+      "error": "Non-array key '-' used on array" },
 
     { "comment": "what should this behavior be?"},
     { "comment": "toplevel as remove target",
@@ -155,12 +152,12 @@
     { "comment": "bad number (in intermediate path location)",
       "doc": [[0,[1]]],
       "patch": [{"op": "test", "path": "/0/1e0/0", "value": 1}],
-      "error": "path '/0/1e0/0' not found in doc" },
+      "error": "path '/0/1e0/0' not found" },
 
     { "comment": "bad number (in intermediate path location)",
       "doc": [[0,[1]]],
       "patch": [{"op": "test", "path": "/0/01/0", "value": 1}],
-      "error": "path '/0/01/0' not found in doc" },
+      "error": "path '/0/01/0' not found" },
 
     { "comment": "Don't convert number representation for object lookup",
       "doc": { "1e0": 1 },
@@ -209,11 +206,16 @@
       "doc": { "foo": 1, "foo\u0000": 2 },
       "patch": [{"op":"test", "path":"/foo\u0000", "value":2}] },
 
-    { "comment": "null as key - this is a PHP Fatal error",
+    { "comment": "null as key",
       "doc": { "\u0000": 1 },
       "patch": [{"op":"replace", "path":"/\u0000", "value":2}],
-      "expected": { "\u0000": 2 },
-      "disabled": true
+      "expected": { "\u0000": 2 }
+    },
+
+    { "comment": "null as key prefix",
+      "doc": { "\u0000foo": 1 },
+      "patch": [{"op":"replace", "path":"/\u0000foo", "value":2}],
+      "expected": { "\u0000foo": 2 }
     },
 
     { "comment": "copy doc onto child",
@@ -221,11 +223,10 @@
       "patch": [{"op":"copy", "from":"", "path":"/bar"}],
       "expected": { "foo": 1, "bar": { "foo": 1 }} },
 
-    { "comment": "move doc onto child (from location must not be proper prefix)",
+    { "comment": "move doc onto child ('from' must not be proper prefix)",
       "doc": { "foo": { "bar": 1 } },
       "patch": [{"op":"move", "from":"/foo", "path":"/foo/bar"}],
       "error": "location not in target doc (already removed)"},
-
 
     { "comment": "need bounds check on intermediate path",
       "doc": [1, [2]],
@@ -236,7 +237,6 @@
       "doc": {"foo": 1},
       "patch": [{"op": "add", "path":"/-", "value": 2}],
       "expected": {"foo": 1, "-": 2} },
-
 
     { "comment": "last" }
 ]
