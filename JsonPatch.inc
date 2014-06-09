@@ -518,7 +518,7 @@ class JsonPatch
 
     else if ($op == 'replace')
     {
-      if (self::is_index($part))
+      if (!self::is_associative($doc) && self::is_index($part))
       {
         array_splice($doc, $part, 1, Array($value));
       }
@@ -534,7 +534,7 @@ class JsonPatch
 
     else if ($op == 'remove')
     {
-      if (self::is_index($part))
+      if (!self::is_associative($doc) && self::is_index($part))
       {
         array_splice($doc, $part, 1);
       }

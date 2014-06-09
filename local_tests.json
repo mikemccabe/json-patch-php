@@ -231,10 +231,20 @@
       "patch": [{"op": "test", "path":"/2/0", "value": 2}],
       "error": "path '/2/0' not in target doc" },
 
-    { "comment": "'-' should be legit member for assoc array",
+    { "comment": "'-' should be legit member for object",
       "doc": {"foo": 1},
       "patch": [{"op": "add", "path":"/-", "value": 2}],
       "expected": {"foo": 1, "-": 2} },
+
+    { "comment": "remove of array-looking element of object",
+      "doc": {"foo":1, "0":2},
+      "patch": [{"op":"remove", "path":"/0"}],
+      "expected": {"foo": 1} },
+
+    { "comment": "replace of array-looking element of object",
+      "doc": {"foo":1, "0":2},
+      "patch": [{"op":"replace", "path":"/0", "value":3}],
+      "expected": {"foo": 1, "0":3} },
 
     { "comment": "last" }
 ]
