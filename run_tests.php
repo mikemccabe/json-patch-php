@@ -68,6 +68,7 @@ function do_test($test, $simplexml_mode=false)
     {
       print("test failed with exception: " . $ex->getMessage() . "\n");
       print_test($test);
+      print("\n");
       return false;
     }
     else
