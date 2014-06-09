@@ -19,6 +19,9 @@ Entry points
 Arguments are PHP arrays, i.e. the output of
 json_decode($json_string, 1)
 
+(Note that you MUST pass 1 as the second argument to json_decode to
+get an array.  This library does not work with stdClass objects.)
+
 All structures are implemented directly as PHP arrays.
 An array is considered to be 'associative' (e.g. like a JSON 'object')
 if it contains at least one non-numeric key.
