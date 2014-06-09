@@ -352,7 +352,7 @@ class JsonPatch
   {
     $found = self::get_helper($doc, $path, $parts, $simplexml_mode);
 
-    if (!self::values_are_deepequal($found, $value))
+    if (!self::considered_equal($found, $value))
     {
       throw new JsonPatchException("test target value different - expected "
                                    . json_encode($value) . ", found "
@@ -399,20 +399,23 @@ class JsonPatch
   }
 
 
-  private static function recursive_ksort($array) {
+  private static function recursive_ksort($array)
+  {
     if (!is_array($array))
     {
       return $array;
     }
     ksort($array);
-    foreach (array_keys($array) as $key) {
+    foreach (array_keys($array) as $key)
+    {
       $array[$key] = self::recursive_ksort($array[$key]);
     }
     return $array;
   }
 
 
-  public static function values_are_deepequal($a1, $a2)
+  // Per http://tools.ietf.org/html/rfc6902#section-4.6
+  public static function considered_equal($a1, $a2)
   {
     if (is_array($a1))
     {

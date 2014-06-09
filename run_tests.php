@@ -1,7 +1,7 @@
 <?php
 
-// This is a simple test jig for testing JsonPatch.inc against
-// the tests in json-patch-tests.
+// This is a simple jig for testing JsonPatch.inc against json-encoded
+// test files.
 
 require_once('JsonPatch.inc');
 
@@ -22,21 +22,6 @@ function print_test($test)
     }
   }
   print " }\n";
-}
-
-
-// 'Recursive ksort' - prepare a php array s.t. json_encode might produce
-// a canonical string.
-function rksort($array = null) {
-  if ($array === null || !is_array($array))
-  {
-    return $array;
-  }
-  ksort($array);
-  foreach (array_keys($array) as $key) {
-    $array[$key] = rksort($array[$key]);
-  }
-  return $array;
 }
 
 
@@ -61,9 +46,8 @@ function do_test($test, $simplexml_mode=false) {
 
     // XXX positive test here re: if error happens, and no exception, fail!
 
-    if (is_array($patched)) $patched = rksort($patched);
-    if (is_array($test['expected'])) $test['expected'] = rksort($test['expected']);
-    if (json_encode($patched) !== json_encode($test['expected'])) {
+    if (!JsonPatch::considered_equal($patched, $test['expected']))
+    {
       print("test failed:\n");
       print_test($test);
       print("found: " . json_encode($patched) . "\n\n");
@@ -88,7 +72,8 @@ function do_test($test, $simplexml_mode=false) {
 // Piggyback on patch tests to test diff as well - use 'doc' and
 // 'expected' from testcases.  Generate a diff, apply it, and check
 // that it matches the target - in both directions.
-function do_diff_test($test) {
+function do_diff_test($test)
+{
   // Skip comment-only or test op tests
   if (!(isset($test['doc']) && isset($test['expected'])))
      return true;
@@ -98,25 +83,23 @@ function do_diff_test($test) {
     $doc2 = $test['expected'];
     $patch = JsonPatch::diff($doc1, $doc2);
     $patched = JsonPatch::patch($doc1, $patch);
-    if (is_array($patched)) $patched = rksort($patched);
-    if (is_array($doc2)) $doc2 = rksort($doc2);
-    if (json_encode($patched) !== json_encode($doc2)) {
+    if (!JsonPatch::considered_equal($patched, $doc2))
+    {
       print("diff test failed:\n");
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
       print("expected: " . json_encode($doc2) . "\n\n");
-
       return false;
     }
     
     // reverse order
     $doc1 = $test['expected']; // copy, in case sort/patch alters
     $doc2 = $test['doc'];
+
     $patch = JsonPatch::diff($doc1, $doc2);
     $patched = JsonPatch::patch($doc1, $patch);
-    if (is_array($patched)) $patched = rksort($patched);
-    if (is_array($doc2)) $doc2 = rksort($doc2);
-    if (json_encode($patched) !== json_encode($doc2)) {
+    if (!JsonPatch::considered_equal($patched, $doc2))
+    {
       print("reverse diff test failed:\n");
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
