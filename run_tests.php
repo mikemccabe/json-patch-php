@@ -5,6 +5,7 @@
 
 require_once('JsonPatch.inc');
 
+$verbose = false;
 function print_test($test)
 {
   print "{ ";
@@ -27,6 +28,7 @@ function print_test($test)
 
 function do_test($test, $simplexml_mode=false)
 {
+  global $verbose;
   // Allow 'comment-only' test records
   if (!(isset($test['doc']) && isset($test['patch'])))
     return true;
@@ -48,8 +50,6 @@ function do_test($test, $simplexml_mode=false)
       return true;
     }
 
-    // XXX positive test here re: if error happens, and no exception, fail!
-
     if (!JsonPatch::considered_equal($patched, $test['expected']))
     {
       print("test failed:\n");
@@ -59,11 +59,11 @@ function do_test($test, $simplexml_mode=false)
     }
     else
     {
-      if (array_key_exists('comment', $test))
+      if ($verbose && array_key_exists('comment', $test))
       {
-        print "OK " . $test['comment'] . "\n\n";
-        return true;
+        print "OK: " . $test['comment'] . "\n\n";
       }
+      return true;
     }
   }
   catch (Exception $ex)
@@ -77,12 +77,15 @@ function do_test($test, $simplexml_mode=false)
     }
     else
     {
-      if (array_key_exists('comment', $test))
+      if ($verbose)
       {
-        print "OK " . $test['comment'] . "\n";
+        if (array_key_exists('comment', $test))
+        {
+          print "OK: " . $test['comment'] . "\n";
+        }
+        print("caught:   " . $ex->getMessage() . "\n");
+        print("expected: " . $test['error'] . "\n\n");
       }
-      print("caught:   " . $ex->getMessage() . "\n");
-      print("expected: " . $test['error'] . "\n\n");
       return true;
     }
   }
@@ -92,7 +95,7 @@ function do_test($test, $simplexml_mode=false)
 // Piggyback on patch tests to test diff as well - use 'doc' and
 // 'expected' from testcases.  Generate a diff, apply it, and check
 // that it matches the target - in both directions.
-function do_diff_test($test)
+function diff_test($test)
 {
   // Skip comment-only or test op tests
   if (!(isset($test['doc']) && isset($test['expected'])))
@@ -109,6 +112,11 @@ function do_diff_test($test)
     if (!JsonPatch::considered_equal($patched, $doc2))
     {
       print("diff test failed:\n");
+      if (array_key_exists('comment', $test))
+      {
+        print $test['comment'] . "\n";
+      }
+      print("from:     " . json_encode($doc1) . "\n");
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
       print("expected: " . json_encode($doc2) . "\n\n");
@@ -124,6 +132,11 @@ function do_diff_test($test)
     if (!JsonPatch::considered_equal($patched, $doc2))
     {
       print("reverse diff test failed:\n");
+      if (array_key_exists('comment', $test))
+      {
+        print $test['comment'] . "\n";
+      }
+      print("from:     " . json_encode($doc1) . "\n");
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
       print("expected: " . json_encode($doc2) . "\n\n");
@@ -135,6 +148,7 @@ function do_diff_test($test)
     print("caught exception ".$ex->getMessage()."\n");
     return false;
   }
+  return true;
 }
 
 
@@ -161,6 +175,10 @@ function test_file($filename, $simplexml_mode=false)
       continue;
     }
     if (!do_test($test))
+    {
+      $success = false;
+    }
+    if (!diff_test($test))
     {
       $success = false;
     }
