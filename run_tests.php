@@ -6,6 +6,7 @@
 require_once('JsonPatch.inc');
 
 $verbose = false;
+
 function print_test($test)
 {
   print "{ ";
