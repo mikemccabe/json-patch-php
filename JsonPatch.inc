@@ -202,7 +202,7 @@ class JsonPatch
       return $doc;
     }
 
-    if (isset($doc[0]) && count($doc) == 1)
+    if (array_key_exists(0, $doc) && count($doc) == 1)
     {
       return self::re_singletize($doc[0]);
     }
@@ -323,18 +323,19 @@ class JsonPatch
     $i = $max - 1;
     while ($i >= 0) // equivalent for loop didn't work?
     {
-      if ($i < $lsrc && $i < $ldst && isset($src[$i], $dst[$i]))
+      if ($i < $lsrc && $i < $ldst && 
+          array_key_exists($i, $src) && array_key_exists($i, $dst))
       {
         $result = array_merge($result,
                               self::diff_values("$path/$i",
                                                 $src[$i], $dst[$i]));
       }
-      else if ($i < $ldst && isset($dst[$i]))
+      else if ($i < $ldst && array_key_exists($i, $dst))
       {
         $result[] = array("op" => "add", "path" => "$path/$i",
                           "value" => $dst[$i]);
       }
-      else if ($i < $lsrc && !isset($dst[$i]))
+      else if ($i < $lsrc && !array_key_exists($i, $dst))
       {
         $result[] = array("op" => "remove", "path" => "$path/$i");
       }

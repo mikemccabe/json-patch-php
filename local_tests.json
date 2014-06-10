@@ -246,5 +246,10 @@
       "patch": [{"op":"replace", "path":"/0", "value":3}],
       "expected": {"foo": 1, "0":3} },
 
+    { "comment": "replace string with null (elicits diff error)",
+      "doc": [""],
+      "patch": [{"op": "replace", "path": "/0", "value": null}],
+      "expected": [null] },
+
     { "comment": "last" }
 ]
