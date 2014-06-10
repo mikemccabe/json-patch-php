@@ -112,10 +112,7 @@ function diff_test($test)
     if (!JsonPatch::considered_equal($patched, $doc2))
     {
       print("diff test failed:\n");
-      if (array_key_exists('comment', $test))
-      {
-        print $test['comment'] . "\n";
-      }
+      print_test($test);
       print("from:     " . json_encode($doc1) . "\n");
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
@@ -126,16 +123,12 @@ function diff_test($test)
     // reverse order
     $doc1 = $test['expected']; // copy, in case sort/patch alters
     $doc2 = $test['doc'];
-
     $patch = JsonPatch::diff($doc1, $doc2);
     $patched = JsonPatch::patch($doc1, $patch);
     if (!JsonPatch::considered_equal($patched, $doc2))
     {
       print("reverse diff test failed:\n");
-      if (array_key_exists('comment', $test))
-      {
-        print $test['comment'] . "\n";
-      }
+      print_test($test);
       print("from:     " . json_encode($doc1) . "\n");
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
