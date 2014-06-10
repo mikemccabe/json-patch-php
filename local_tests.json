@@ -71,6 +71,16 @@
       "patch": [{"op": "remove", "path": "/-"}],
       "error": "Non-array key '-' used on array" },
 
+    { "comment": "remove of numeric index from obj doesn't convert to array",
+      "doc": {"foo": 1, "0":2, "bar":3},
+      "patch": [{"op": "remove", "path":"/0"}],
+      "expected": {"foo":1, "bar":3} },
+
+    { "comment": "- as remove target for obj isn't special",
+      "doc": {"-": 1, "foo": 2},
+      "patch": [{"op": "remove", "path": "/-"}],
+      "expected": {"foo": 2} },
+
     { "comment": "toplevel as remove target",
       "doc": [1],
       "patch": [{"op": "remove", "path": ""}],
@@ -250,6 +260,10 @@
       "doc": [""],
       "patch": [{"op": "replace", "path": "/0", "value": null}],
       "expected": [null] },
+
+    { "comment": "test object sorting for equality if numeric indices exist",
+      "doc": {"foo":1,"bar":3,"0":2},
+      "patch": [{"op": "test", "path":"", "value": {"foo":1,"0":2,"bar":3}}] },
 
     { "comment": "last" }
 ]

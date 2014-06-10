@@ -410,7 +410,9 @@ class JsonPatch
     {
       $a[$key] = self::rksort($a[$key]);
     }
-    ksort($a);
+    // SORT_STRING seems required, as otherwise numeric indices
+    // (e.g. "4") aren't sorted.
+    ksort($a, SORT_STRING);
     return $a;
   }
 
