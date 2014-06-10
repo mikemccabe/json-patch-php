@@ -167,11 +167,11 @@ function test_file($filename, $simplexml_mode=false)
     {
       continue;
     }
-    if (!do_test($test))
+    if (!do_test($test, $simplexml_mode))
     {
       $success = false;
     }
-    if (!diff_test($test))
+    if (!$simplexml_mode && !diff_test($test))
     {
       $success = false;
     }
