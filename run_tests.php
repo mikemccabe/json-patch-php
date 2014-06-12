@@ -104,6 +104,7 @@ function diff_test($test)
      return true;
   }
 
+  $result = true;
   try
   {
     $doc1 = $test['doc']; // copy, in case sort/patch alters
@@ -118,7 +119,7 @@ function diff_test($test)
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
       print("expected: " . json_encode($doc2) . "\n\n");
-      return false;
+      $result = false;
     }
     
     // reverse order
@@ -134,7 +135,7 @@ function diff_test($test)
       print("diff:     " . json_encode($patch) . "\n");
       print("found:    " . json_encode($patched) . "\n");
       print("expected: " . json_encode($doc2) . "\n\n");
-      return false;
+      $result = false;
     }
   }
   catch (Exception $ex)
@@ -142,7 +143,7 @@ function diff_test($test)
     print("caught exception ".$ex->getMessage()."\n");
     return false;
   }
-  return true;
+  return $result;
 }
 
 
