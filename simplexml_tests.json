@@ -4,17 +4,12 @@
       "patch": [ { "op":"add", "path":"/foo/1", "value":2 } ],
       "expected": { "foo":[1, 2] } },
 
-    { "comment": "Add 1-length array is equivalent to scalar add",
-      "doc": { },
-      "patch": [ { "op":"add", "path":"/foo/0", "value":1 } ],
-      "expected": { "foo":1 } },
-
     { "comment": "replace as array",
       "doc": { "foo":1 },
       "patch": [ { "op":"replace", "path":"/foo/0", "value":2 } ],
       "expected": { "foo":2 } },
 
-    { "comment": "remove penultimate demotes to singleton",
+    { "comment": "remove last demotes to singleton",
       "doc": { "foo":[1, 2] },
       "patch": [ { "op":"remove", "path":"/foo/1"} ],
       "expected": { "foo":1 } },
