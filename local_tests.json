@@ -265,5 +265,17 @@
       "doc": {"foo":1,"bar":3,"0":2},
       "patch": [{"op": "test", "path":"", "value": {"foo":1,"0":2,"bar":3}}] },
 
+    { "comment": "test php-style array element delete - disabled as reverse diff (gappy array from pure array) is impossible in json-patch without borrowing php array semantics",
+      "doc": {"0":"a", "2":"c"},
+      "patch": {"op":"add", "path":"/1", "value":"b"},
+      "expected": {"0":"a", "1":"b", "2":"c"},
+      "disabled": true
+    },
+
+    { "comment": "test php-style array element delete - assoc-ish indexes",
+      "doc": {"0a":"a", "2c":"c"},
+      "patch": {"op":"add", "path":"/1b", "value":"b"},
+      "expected": {"0a":"a", "1b":"b", "2c": "c"} },
+
     { "comment": "last" }
 ]

@@ -402,6 +402,16 @@ class JsonPatch
         return true;
       }
     }
+    // Also treat php gappy arrays as associative.
+    // (e.g. {"0":"a", "2":"c"})
+    $len = count($a);
+    for ($i = 0; $i < $len; $i++)
+    {
+      if (!array_key_exists($i, $a))
+      {
+        return true;
+      }
+    }
     return false;
   }
 
