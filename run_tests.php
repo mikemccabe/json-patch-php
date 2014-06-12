@@ -196,10 +196,10 @@ function main()
       $result = false;
     }
   }
-  /* if (!test_file('simplexml_tests.json', true)) */
-  /* { */
-  /*   $result = false; */
-  /* } */
+  if (!test_file('simplexml_tests.json', true))
+  {
+    $result = false;
+  }
   return $result;
 }
 
