@@ -165,7 +165,7 @@ function test_file($filename, $simplexml_mode=false)
   $success = true;
   foreach ($tests as $test)
   {
-    if (isset($test['disabled']))
+    if (isset($test['disabled']) && $test['disabled'])
     {
       continue;
     }
