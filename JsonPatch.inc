@@ -129,27 +129,32 @@ class JsonPatch
 
       if ($op === 'add')
       {
-        $doc = self::do_op($doc, $op, $path, $parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, $op, $path, $parts, $value,
+                           $simplexml_mode);
       }
       else if ($op == 'replace')
       {
-        $doc = self::do_op($doc, $op, $path, $parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, $op, $path, $parts, $value,
+                           $simplexml_mode);
       }
       else if ($op == 'remove')
       {
-        $doc = self::do_op($doc, $op, $path, $parts, null, $simplexml_mode);
+        $doc = self::do_op($doc, $op, $path, $parts, null,
+                           $simplexml_mode);
       }
 
       else if ($op == 'test')
       {
-        self::test($doc, $path, $parts, $value, $simplexml_mode);
+        self::test($doc, $path, $parts, $value,
+                   $simplexml_mode);
       }
 
       else if ($op == 'copy')
       {
         $value = self::get_helper($doc, $from_path, $from_parts,
                                   $simplexml_mode);
-        $doc = self::do_op($doc, 'add', $path, $parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, 'add', $path, $parts, $value,
+                           $simplexml_mode);
       }
       else if ($op == 'move')
       {
@@ -157,7 +162,8 @@ class JsonPatch
                                   $simplexml_mode);
         $doc = self::do_op($doc, 'remove', $from_path, $from_parts, null,
                            $simplexml_mode);
-        $doc = self::do_op($doc, 'add', $path, $parts, $value, $simplexml_mode);
+        $doc = self::do_op($doc, 'add', $path, $parts, $value,
+                           $simplexml_mode);
       }
     }
 
