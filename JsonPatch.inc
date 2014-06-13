@@ -493,9 +493,10 @@ class JsonPatch
       // special case for simplexml-style behavior - make singleton
       // scalar leaves look like 1-length arrays
       if ($simplexml_mode
-          && count($parts) == 1 // XXXmm needed?
-          && ($parts[0] == '0' || $parts[0] == '1')
-          && self::is_associative($doc) && !is_array($doc[$part]))
+          && count($parts) > 0
+          && ($parts[0] == '0' || $parts[0] == '1' || $parts[0] == '-')
+          && self::is_associative($doc)
+          && !(is_array($doc[$part]) && !self::is_associative($doc[$part])))
       {
         $doc[$part] = self::do_op(array($doc[$part]), $op, $path, $parts,
                                   $value, $simplexml_mode);

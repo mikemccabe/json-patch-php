@@ -1,10 +1,20 @@
 [
-    { "comment": "basic simplexml promotion",
+    { "comment": "simplexml promotion - add after scalar",
       "doc": { "foo":1 },
       "patch": [ { "op":"add", "path":"/foo/1", "value":2 } ],
       "expected": { "foo":[1, 2] } },
 
-     { "comment": "Add 1-length array is equivalent to scalar add",
+    { "comment": "simplexml promotion - add before scalar",
+      "doc": { "foo":1 },
+      "patch": [ { "op":"add", "path":"/foo/0", "value":2 } ],
+      "expected": { "foo":[2, 1] } },
+
+    { "comment": "simplexml promotion - append",
+      "doc": { "foo":1 },
+      "patch": [ { "op":"add", "path":"/foo/-", "value":2 } ],
+      "expected": { "foo":[1, 2] } },
+
+    { "comment": "Add 1-length array is equivalent to scalar add",
        "doc": { },
        "patch": [ { "op":"add", "path":"/foo/0", "value":1 } ],
        "expected": { "foo":1 },
