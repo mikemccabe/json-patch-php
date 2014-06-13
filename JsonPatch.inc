@@ -381,7 +381,20 @@ class JsonPatch
     {
       throw new JsonPatchException("Path '$path' not found");
     }
-    return self::get_helper($doc[$part], $path, $parts, $simplexml_mode);
+    if ($simplexml_mode
+        && count($parts) > 0
+        && $parts[0] == '0'
+        && self::is_associative($doc)
+        && !(is_array($doc[$part]) && !self::is_associative($doc[$part])))
+    {
+      return self::get_helper(array($doc[$part]), $path, $parts,
+                              $simplexml_mode);
+    }
+    else
+    {
+      return self::get_helper($doc[$part], $path, $parts,
+                              $simplexml_mode);
+    }
   }
 
 
