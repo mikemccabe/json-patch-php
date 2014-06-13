@@ -14,6 +14,7 @@ Produce and apply JSON-patch objects.
 Implements IETF JSON-patch (RFC 6902) and JSON-pointer (RFC 6901):
 
 http://tools.ietf.org/html/rfc6902
+
 http://tools.ietf.org/html/rfc6901
 
 Entry points
@@ -24,7 +25,7 @@ Entry points
 - patch($doc, $patches) - apply patches to $doc and return result
 
 Arguments are PHP arrays, i.e. the output of
-json_decode($json_string, 1)
+json_decode($json_string, 1).
 
 (Note that you MUST pass 1 as the second argument to json_decode to
 get an array.  This library does not work with stdClass objects.)
