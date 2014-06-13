@@ -14,6 +14,16 @@
       "patch": [ { "op":"add", "path":"/foo/-", "value":2 } ],
       "expected": { "foo":[1, 2] } },
 
+    { "comment": "append to array",
+      "doc": { "foo":1 },
+      "patch": [ { "op":"add", "path":"/foo/-", "value":2 } ],
+      "expected": { "foo":[1, 2] } },
+
+    { "comment": "mid-path 0-index with tail 0-index - append",
+      "doc": { "foo": { "bar": 1 } },
+      "patch": [ { "op":"add", "path":"/foo/0/bar/-", "value":2 }],
+      "expected": { "foo": { "bar": [1,2] }} },
+
     { "comment": "Add 1-length array is equivalent to scalar add",
        "doc": { },
        "patch": [ { "op":"add", "path":"/foo/0", "value":1 } ],
