@@ -156,6 +156,21 @@
       "patch": [{"op": "test", "path":"", "value": ""}],
       "error": "test target value different - expected \"\", found false" },
 
+    { "comment": "numeric literal with underscore",
+      "doc": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      "patch": [{"op":"test", "path": "/1_1", "value":11}],
+      "error": "path '/1_1' not found" },
+
+    { "comment": "numeric literal with hex",
+      "doc": [0, 1],
+      "patch": [{"op":"test", "path": "/0x1", "value":1}],
+      "error": "path '/0x1' not found" },
+
+    { "comment": "numeric literal, long integer",
+      "doc": [0, 1],
+      "patch": [{"op":"test", "path": "/1L", "value":1}],
+      "error": "path '/1L' not found" },
+
     { "comment": "bad number (in intermediate path location)",
       "doc": [[0,[1]]],
       "patch": [{"op": "test", "path": "/0/1e0/0", "value": 1}],
