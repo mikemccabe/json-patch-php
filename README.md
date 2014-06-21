@@ -11,9 +11,9 @@ http://tools.ietf.org/html/rfc6901
 Entry points
 ------------
 
-- get($doc, $pointer) - get a value from a json document
-- diff($src, $dst) - return patches to create $dst from $src
-- patch($doc, $patches) - apply patches to $doc and return result
+- JsonPatch::get($doc, $pointer) - get a value from a json document
+- JsonPatch::patch($doc, $patches) - apply patches to $doc and return result
+- JsonPatch::diff($src, $dst) - return patches to create $dst from $src
 
 Arguments are PHP arrays, i.e. the output of
 json_decode($json_string, 1)
