@@ -211,7 +211,9 @@
     { "comment": "append",
       "doc": [1, 2, 3, 4],
       "patch": [{"op": "append", "path": "/-", "value":[5, 6, 7, 8]}],
-      "expected": [1, 2, 3, 4, 5, 6, 7, 8] },
+      "expected": [1, 2, 3, 4, 5, 6, 7, 8],
+      "disabled": true
+    },
 
     { "comment": "last" }
 ]
