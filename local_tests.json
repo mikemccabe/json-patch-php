@@ -4,43 +4,6 @@
       "patch": [ { "op": "add", "path": "/1", "value": 2 } ],
       "expected": { "foo": 1, "1": 2 } },
 
-    { "comment": "missing 'value' parameter to add",
-      "doc": [ 1 ],
-      "patch": [ { "op": "add", "path": "/-" } ],
-      "error": "missing 'value' parameter" },
-
-    { "comment": "missing 'value' parameter to replace",
-      "doc": [ 1 ],
-      "patch": [ { "op": "replace", "path": "/0" } ],
-      "error": "missing 'value' parameter" },
-
-    { "comment": "missing 'value' parameter to test",
-      "doc": [ null ],
-      "patch": [ { "op": "test", "path": "/0" } ],
-      "error": "missing 'value' parameter" },
-
-    { "comment": "missing value parameter to test - where undef is falsy",
-      "doc": [ false ],
-      "patch": [ { "op": "test", "path": "/0" } ],
-      "error": "missing 'value' parameter" },
-
-    { "comment": "missing from parameter to copy",
-      "doc": [ 1 ],
-      "patch": [ { "op": "copy", "path": "/-" } ],
-      "error": "missing 'from' parameter" },
-
-    { "comment": "missing from parameter to move",
-      "doc": { "foo": 1 },
-      "patch": [ { "op": "move", "path": "" } ],
-      "error": "missing 'from' parameter" },
-
-    { "comment": "duplicate ops",
-      "doc": { "foo": "bar" },
-      "patch": [ { "op": "add", "path": "/baz", "value": "qux",
-                   "op": "move", "from":"/foo" } ],
-      "error": "patch has two 'op' members",
-      "disabled": true },
-
     { "comment": "Adding to \"/-\" adds to the end of the array",
       "doc": [ 1, 2 ],
       "patch": [ { "op": "add", "path": "/-", "value": 3 } ],
@@ -85,11 +48,6 @@
       "doc": [1],
       "patch": [{"op": "remove", "path": ""}],
       "error": "Can't remove whole document" },
-
-    { "comment": "unrecognized op should fail",
-      "doc": {"foo": 1},
-      "patch": [{"op": "spam", "path": "/foo", "value": 1}],
-      "error": "Unrecognized op 'spam'" },
 
     { "comment": "Ok to have doc as toplevel string?",
       "doc": 1,
@@ -155,60 +113,6 @@
       "doc": false,
       "patch": [{"op": "test", "path":"", "value": ""}],
       "error": "test target value different - expected \"\", found false" },
-
-    { "comment": "numeric literal with underscore",
-      "doc": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      "patch": [{"op":"test", "path": "/1_1", "value":11}],
-      "error": "path '/1_1' not found" },
-
-    { "comment": "numeric literal with hex",
-      "doc": [0, 1],
-      "patch": [{"op":"test", "path": "/0x1", "value":1}],
-      "error": "path '/0x1' not found" },
-
-    { "comment": "numeric literal, long integer",
-      "doc": [0, 1],
-      "patch": [{"op":"test", "path": "/1L", "value":1}],
-      "error": "path '/1L' not found" },
-
-    { "comment": "bad number (in intermediate path location)",
-      "doc": [[0,[1]]],
-      "patch": [{"op": "test", "path": "/0/1e0/0", "value": 1}],
-      "error": "path '/0/1e0/0' not found" },
-
-    { "comment": "bad number (in intermediate path location)",
-      "doc": [[0,[1]]],
-      "patch": [{"op": "test", "path": "/0/01/0", "value": 1}],
-      "error": "path '/0/01/0' not found" },
-
-    { "comment": "Don't convert number representation for object lookup",
-      "doc": { "1e0": 1 },
-      "patch": [{"op": "test", "path": "/1", "value": 1}],
-      "error": "path '/1' not found" },
-
-    { "comment": "Don't convert number representation for object lookup",
-      "doc": { "1e0": 1 },
-      "patch": [{"op": "test", "path": "/1e0", "value": 1}] },
-
-    { "comment": "test remove with bad number should fail",
-      "doc": {"foo": 1, "baz": [{"qux": "hello"}]},
-      "patch": [{"op": "remove", "path": "/baz/1e0/qux"}],
-      "error": "Path '/baz/1e0/qux' not found" },
-
-    { "comment": "test replace with bad number should fail",
-      "doc": [1, 2],
-      "patch": [{"op": "replace", "path": "/1e0", "value": false}],
-      "error": "non-array key '1e0' used on array" },
-
-    { "comment": "test copy with bad number should fail",
-      "doc": {"baz": [1,2,3], "bar": 1},
-      "patch": [{"op": "copy", "from": "/baz/1e0", "path": "/boo"}],
-      "error": "path '/baz/1e0' not found" },
-
-    { "comment": "test move with bad number should fail",
-      "doc": {"foo": 1, "baz": [1,2,3,4]},
-      "patch": [{"op": "move", "from": "/baz/1e0", "path": "/foo"}],
-      "error": "path '/baz/1e0' not found" },
 
     { "comment": "null within string",
       "doc": [ "foo\u0000foo" ],
@@ -291,6 +195,23 @@
       "doc": {"0a":"a", "2c":"c"},
       "patch": {"op":"add", "path":"/1b", "value":"b"},
       "expected": {"0a":"a", "1b":"b", "2c": "c"} },
+
+    { "comment": "Numerically equal must test equal",
+      "doc": [1.00],
+      "patch": [{"op": "test", "path":"/0", "value":1}]},
+
+    { "comment": "Numerically equal must test equal",
+      "doc": [1],
+      "patch": [{"op": "test", "path":"/0", "value":1.00}]},
+
+    { "comment": "Numerically equal must test equal",
+      "doc": [1e0],
+      "patch": [{"op": "test", "path":"/0", "value":1.00}]},
+
+    { "comment": "append",
+      "doc": [1, 2, 3, 4],
+      "patch": [{"op": "append", "path": "/-", "value":[5, 6, 7, 8]}],
+      "expected": [1, 2, 3, 4, 5, 6, 7, 8] },
 
     { "comment": "last" }
 ]

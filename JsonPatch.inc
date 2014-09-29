@@ -102,14 +102,14 @@ class JsonPatch
                                      . json_encode($patch));
       }
       if (!in_array($op, array('add', 'remove', 'replace',
-                               'move', 'copy', 'test')))
+                               'move', 'copy', 'test', 'append')))
       {
         throw new JsonPatchException("Unrecognized op '$op' in "
                                      . json_encode($patch));
       }
 
       $parts = self::decompose_pointer($path);
-      if (in_array($op, Array('test', 'add', 'replace')))
+      if (in_array($op, Array('test', 'add', 'replace', 'append')))
       {
         if (!array_key_exists('value', $patch))
         {
@@ -130,6 +130,11 @@ class JsonPatch
       }
 
       if ($op === 'add')
+      {
+        $doc = self::do_op($doc, $op, $path, $parts, $value,
+                           $simplexml_mode);
+      }
+      if ($op === 'append')
       {
         $doc = self::do_op($doc, $op, $path, $parts, $value,
                            $simplexml_mode);
@@ -520,7 +525,7 @@ class JsonPatch
     if (!self::is_associative($doc)) // N.B. returns false for empty arrays
     {
       if (count($doc) && !self::is_index($part)
-          && !($part == '-' && $op == 'add'))
+          && !($part == '-' && ($op == 'add' || $op == 'append')))
       {
         throw new JsonPatchException("Non-array key '$part' used on array");
       }
@@ -536,14 +541,21 @@ class JsonPatch
       }
     }
 
-    if ($op == 'add')
+    if ($op == 'add' || $op == 'append')
     {
       if (!self::is_associative($doc)
           && (self::is_index($part) || $part == '-'))
       {
         // If index is '-', use array length
         $index = ($part == '-') ? count($doc) : $part;
-        array_splice($doc, $index, 0, Array($value));
+        if ($op == 'append')
+        {
+          array_splice($doc, $index, 0, $value);
+        }
+        else
+        {
+          array_splice($doc, $index, 0, Array($value));
+        }
       }
       else
       {
