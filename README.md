@@ -8,6 +8,31 @@ Implements IETF JSON-patch (RFC 6902) and JSON-pointer (RFC 6901):
 http://tools.ietf.org/html/rfc6902
 http://tools.ietf.org/html/rfc6901
 
+Using with Composer
+-------------------
+
+To use this library as a Composer dependency in your project, include the
+following sections in your project's `composer.json` file:
+
+```
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/mikemccabe/json-patch-php"
+        }
+    ],
+    "require": {
+        "mikemccabe/json-patch-php": "dev-master"
+    }
+```
+
+Then, in your project's code, use the `JsonPatch` class definition from
+the `mikemccabe\JsonPatch` namespace like so:
+
+```php
+use mikemccabe\JsonPatch\JsonPatch;
+```
+
 Entry points
 ------------
 
