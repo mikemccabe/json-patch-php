@@ -6,4 +6,7 @@ php:
   - 5.6
   - hhvm
 
+before_script:
+  - composer install --prefer-source
+
 script: php run_tests.php

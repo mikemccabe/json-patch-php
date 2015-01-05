@@ -54,8 +54,9 @@ scalars on return from patch().
 
 */
 
+namespace mikemccabe\JsonPatch;
 
-class JsonPatchException extends Exception { }
+class JsonPatchException extends \Exception { }
 
 
 class JsonPatch
