@@ -3,7 +3,9 @@
 // This is a simple jig for testing JsonPatch.inc against json-encoded
 // test files.
 
-require_once('JsonPatch.inc');
+require 'vendor/autoload.php';
+
+use mikemccabe\JsonPatch\JsonPatch;
 
 $verbose = false;
 
