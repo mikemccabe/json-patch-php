@@ -110,6 +110,9 @@ class JsonPatch
       }
 
       $parts = self::decompose_pointer($path);
+      
+      
+      
       if (in_array($op, Array('test', 'add', 'replace', 'append')))
       {
         if (!array_key_exists('value', $patch))
@@ -412,9 +415,13 @@ class JsonPatch
   // note: is_associative(array()) === false
   private static function is_associative($a)
   {
-    if (!is_array($a))
+    if (!is_array($a) && !($a instanceof \ArrayAccess))
     {
       return false;
+    }
+    if ($a instanceof \ArrayAccess)
+    {
+    	return true;
     }
     foreach (array_keys($a) as $key)
     {
@@ -470,6 +477,7 @@ class JsonPatch
   private static function do_op($doc, $op, $path, $parts, $value,
                                 $simplexml_mode)
   {
+  	
     // Special-case toplevel
     if (count($parts) == 0)
     {
@@ -492,38 +500,42 @@ class JsonPatch
     // recur until we get to the target
     if (count($parts) > 0)
     {
-      if (!array_key_exists($part, $doc))
-      {
-        throw new JsonPatchException("Path '$path' not found");
-      }
-      // recur, adding resulting sub-doc into doc returned to caller
-
-      // special case for simplexml-style behavior - make singleton
-      // scalar leaves look like 1-length arrays
-      if ($simplexml_mode
-          && count($parts) > 0
-          && ($parts[0] == '0' || $parts[0] == '1' || $parts[0] == '-')
-          && self::is_associative($doc)
-          && !(is_array($doc[$part]) && !self::is_associative($doc[$part])))
-      {
-        $doc[$part] = self::do_op(array($doc[$part]), $op, $path, $parts,
-                                  $value, $simplexml_mode);
-      }
-      else
-      {
-        $doc[$part] = self::do_op($doc[$part], $op, $path, $parts,
-                                  $value, $simplexml_mode);
-      }
+	  if( is_array($doc) || $doc instanceof \ArrayAccess )
+	  {
+	  	//Array key or ArrayAccess object property not found
+	  	if ( ( is_array($doc) && !array_key_exists($part, $doc) ) || ( $doc instanceof \ArrayAccess && !property_exists($doc, $part) ) )
+	  	{
+	  		throw new JsonPatchException("Path '$path' not found");
+	  	}
+	  	// recur, adding resulting sub-doc into doc returned to caller
+	  	
+	  	// special case for simplexml-style behavior - make singleton
+	  	// scalar leaves look like 1-length arrays
+	  	if ($simplexml_mode
+	  			&& count($parts) > 0
+	  			&& ($parts[0] == '0' || $parts[0] == '1' || $parts[0] == '-')
+	  			&& self::is_associative($doc)
+	  			&& !(is_array($doc[$part]) && !self::is_associative($doc[$part])))
+	  	{
+	  		$doc[$part] = self::do_op(array($doc[$part]), $op, $path, $parts,
+	  				$value, $simplexml_mode);
+	  	}
+	  	else
+	  	{
+	  		$doc[$part] = self::do_op($doc[$part], $op, $path, $parts,
+	  				$value, $simplexml_mode);
+	  	}
+	  }
       return $doc;
     }
 
     // at target
-    if (!is_array($doc))
+    if( !is_array($doc) && !($doc instanceof \ArrayAccess) )
     {
       throw new JsonPatchException('Target must be array or associative array');
     }
-
-    if (!self::is_associative($doc)) // N.B. returns false for empty arrays
+    
+	if (!self::is_associative($doc)) // N.B. returns false for empty arrays
     {
       if (count($doc) && !self::is_index($part)
           && !($part == '-' && ($op == 'add' || $op == 'append')))
@@ -572,9 +584,12 @@ class JsonPatch
       }
       else
       {
-        if (!array_key_exists($part, $doc))
+        if (is_array($doc) && !array_key_exists($part, $doc))
         {
           throw new JsonPatchException("replace target '$path' not set");
+        }
+        if($doc instanceof \ArrayAccess && !\property_exists($doc, $part)){
+        	throw new JsonPatchException("replace target '$path' in not a valid property of this document");
         }
         $doc[$part] = $value;
       }
