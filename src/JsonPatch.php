@@ -261,7 +261,7 @@ class JsonPatch
   private static function diff_values($path, $value, $other)
   {
     // manually handle the {}-looks-like-[] case, when other is associative
-    if ((count($value) == 0 || count($other) == 0)
+    if ((!$value || !$other)
         && (self::is_associative($value) || self::is_associative($other)))
     {
       return self::diff_assoc($path, $value, $other);
