@@ -290,17 +290,17 @@ class JsonPatch
   // Walk associative arrays $src and $dst, returning a list of patches
   private static function diff_assoc($path, $src, $dst)
   {
-    $result = array();
-    if (count($src) == 0 && count($dst) != 0)
+    if ((!is_array($src) || count($src)) == 0 && is_array($dst) && count($dst) != 0)
     {
-      $result[] = array("op" => "replace", "path" => "$path", "value" => $dst);
+      return array(array("op" => "replace", "path" => "$path", "value" => $dst));
     }
-    else
-    {
+
+    $result = array();
+    if (is_array($src)) {
       foreach (array_keys($src) as $key)
       {
         $ekey = self::escape_pointer_part($key);
-        if (!array_key_exists($key, $dst))
+        if (!is_array($dst) || !array_key_exists($key, $dst))
         {
           $result[] = array("op" => "remove", "path" => "$path/$ekey");
         }
@@ -311,9 +311,11 @@ class JsonPatch
                                                   $src[$key], $dst[$key]));
         }
       }
+    }
+    if (is_array($dst)) {
       foreach (array_keys($dst) as $key)
       {
-        if (!array_key_exists($key, $src))
+        if (!is_array($src) || !array_key_exists($key, $src))
         {
           $ekey = self::escape_pointer_part($key);
           $result[] = array("op" => "add", "path" => "$path/$ekey",
@@ -337,7 +339,7 @@ class JsonPatch
     $i = $max - 1;
     while ($i >= 0) // equivalent for loop didn't work?
     {
-      if ($i < $lsrc && $i < $ldst && 
+      if ($i < $lsrc && $i < $ldst &&
           array_key_exists($i, $src) && array_key_exists($i, $dst))
       {
         $result = array_merge($result,
