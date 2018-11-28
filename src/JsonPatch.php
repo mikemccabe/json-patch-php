@@ -355,7 +355,8 @@ class JsonPatch
       }
       $i--;
     }
-    return $result;
+
+    return array_reverse($result);
   }
 
 
