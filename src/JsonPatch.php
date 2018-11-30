@@ -346,8 +346,13 @@ class JsonPatch
       }
       else if ($i < $ldst && array_key_exists($i, $dst))
       {
-        $result[] = array("op" => "add", "path" => "$path/$i",
-                          "value" => $dst[$i]);
+          //-- Add operations need to moved to the front?
+          $operation  = array(
+              "op"    => "add",
+              "path"  => "$path/$i",
+              "value" => $dst[$i]
+          );
+          array_unshift($result, $operation);
       }
       else if ($i < $lsrc && !array_key_exists($i, $dst))
       {
@@ -356,7 +361,7 @@ class JsonPatch
       $i--;
     }
 
-    return array_reverse($result);
+    return $result;
   }
 
 
