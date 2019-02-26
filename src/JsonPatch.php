@@ -517,6 +517,10 @@ class JsonPatch
       return $doc;
     }
 
+    if (null === $doc && ($op == 'add' || $op == 'append')) {
+        $doc = [];
+    }
+
     // at target
     if (!is_array($doc))
     {
@@ -534,8 +538,7 @@ class JsonPatch
       {
         // check range, if numeric
         if (self::is_index($part) &&
-            ($part < 0 || (($op == 'remove' && $part >= count($doc))
-                           || ($op != 'remove' && $part > count($doc)))))
+            ($part < 0 || (($op == 'remove' && $part >= count($doc)))))
         {
           throw new JsonPatchException("Can't operate outside of array bounds");
         }
